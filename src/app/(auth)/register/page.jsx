@@ -47,33 +47,38 @@ const formSchema = z.object({
 export default function Register() {
   const router = useRouter();
   const { toast } = useToast();
-  // Uso del hook useForm para manejar el estado del formulario
+ // Uso del hook useForm para manejar el estado del formulario
   const form = useForm({
     resolver: zodResolver(formSchema),
-  });
+  }); 
 
   // Función para manejar el envío del formulario
   const onSubmit = async (data) => {
     console.log(data);
     try {
-      const response = await fetch("/api/user", {
+      const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
       });
-
+  
       if (response.ok) {
         toast({
           title: "Cuenta creada",
           description: "Tu cuenta ha sido creada exitosamente.",
-          
           duration: 3000,
         });
-
+  
         // Redirigir al usuario a la página de inicio de sesión
         router.push("/login");
+      } else if (response.status === 409) { // Manejo de conflicto si el usuario ya existe
+        toast({
+          title: "Usuario ya existente",
+          description: "Ya existe una cuenta con este correo electrónico.",
+          variant: "destructive",
+        });
       } else {
         toast({
           title: "Error",
@@ -89,9 +94,10 @@ export default function Register() {
           "Hubo un error al crear tu cuenta. Por favor, intenta de nuevo.",
         variant: "destructive",
       });
-      console.error("Error aal enviar el formulario", error);
+      console.error("Error al enviar el formulario", error);
     }
   };
+  
 
   return (
     <div className="container m-auto flex h-screen w-full max-w-lg flex-col items-center justify-center">
