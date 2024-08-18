@@ -1,11 +1,13 @@
-'use client'
+'use client';
+
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { LogOutIcon, MountainIcon } from "lucide-react";
+import { signOut } from "next-auth/react";
 
 export default function Navbar() {
   const handleLogout = () => {
-    alert("Logout");
+    signOut({ callbackUrl: "/login" });
   };
 
   return (

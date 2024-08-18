@@ -1,9 +1,6 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { auth } from "@/auth";
+import LogoutButton from "@/app/(auth)/components/LogoutButton";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -12,9 +9,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import React from "react";
 
-export default function page() {
+export default async function DashboardPage() {
+  const session = await auth();
+
+  if (!session) {
+    return <div>Not logged in</div>;
+  }
+
   return (
     <div className="flex min-h-screen">
       <div className="flex-1 bg-gray-100">
@@ -110,7 +112,7 @@ export default function page() {
   );
 }
 
-// Crea usuarios fictisios
+// Crea usuarios ficticios
 const users = [
   {
     id: "1",
