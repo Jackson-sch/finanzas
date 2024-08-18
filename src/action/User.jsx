@@ -34,9 +34,15 @@ const registerActions = async (formData) => {
     email,
     password: hashedPassword,
   });
-  console.log("🚀 ~ Register ~ User:", User);
 
-  redirect("/login");
+  // Autenticar al usuario
+  await signIn("credentials", {
+    email,
+    password,
+    redirect: false,
+  });
+
+  return { success: true };
 };
 
 const loginAction = async (formData) => {
@@ -53,9 +59,11 @@ const loginAction = async (formData) => {
     // Verifica si hubo un error en la autenticación
     if (result?.error) {
       if (result.error === "CredentialsSignin") {
-        return {error: "Correo no registrado o contraseña incorrecta"}
+        return { error: "Correo no registrado o contraseña incorrecta" };
       } else {
-        return {error: "Ocurrió un error inesperado. Por favor, intenta de nuevo."}
+        return {
+          error: "Ocurrió un error inesperado. Por favor, intenta de nuevo.",
+        };
       }
     }
     return result;

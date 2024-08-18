@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { registerSchema } from "@/lib/zod";
 import { useState, useTransition } from "react";
-import RegisterActions from "@/action/User";
+import { registerActions } from "@/action/User";
 
 export default function FormRegister() {
   const [error, setError] = useState(null);
@@ -83,10 +83,10 @@ export default function FormRegister() {
     }
   };
 
-  const handleSubmit = (formData) => {
+  const handleSubmit = async (formData) => {
     setError(null);
-    startTransition(() => {
-      const response = RegisterActions(formData);
+    startTransition(async () => {
+      const response = await registerActions(formData);
       if (response.error) {
         setError(response.error);
         toast({
@@ -101,7 +101,7 @@ export default function FormRegister() {
           description: "Su cuenta ha sido creada exitosamente.",
           duration: 3000,
         });
-        router.push("/login");
+        router.push("/dashboard");
       }
     });
   };
