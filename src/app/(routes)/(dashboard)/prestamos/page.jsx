@@ -1,9 +1,9 @@
-'use client'
-import LoanList from '@/components/(dashboard)/Prestamos/Listar';
-import LoanPaymentForm from '@/components/(dashboard)/Prestamos/Pagos';
-import LoanForm from '@/components/(dashboard)/Prestamos/Registrar';
-import { useState } from 'react';
-
+"use client";
+import LoanList from "@/components/(dashboard)/Prestamos/Listar";
+import LoanPaymentForm from "@/components/(dashboard)/Prestamos/Pagos";
+import Prestamos from "@/components/(dashboard)/Prestamos/Prestamos";
+import LoanForm from "@/components/(dashboard)/Prestamos/Registrar";
+import { useState } from "react";
 
 function App() {
   const [transactions, setTransactions] = useState([]);
@@ -24,12 +24,13 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-xl mx-auto">
-        <LoanForm addLoan={addLoan} />
+    <div className="min-h-screen ">
+      <div className="mx-auto ">
+        {/* <LoanForm addLoan={addLoan} />
         <LoanList loans={loans} />
-        <LoanPaymentForm loans={loans} addPayment={addPayment} />
+        <LoanPaymentForm loans={loans} addPayment={addPayment} /> */}
         {/* Aquí puedes añadir más funcionalidades como gráficos y exportación */}
+        <Prestamos />
       </div>
     </div>
   );

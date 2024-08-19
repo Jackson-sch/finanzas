@@ -1,17 +1,13 @@
-'use client';
+"use client";
 
-import { Button } from "../ui/button";
 import Link from "next/link";
-import { LogOutIcon, MountainIcon } from "lucide-react";
-import { signOut } from "next-auth/react";
+import { MountainIcon } from "lucide-react";
 
 export default function Navbar() {
-  const handleLogout = () => {
-    signOut({ callbackUrl: "/login" });
-  };
+
 
   return (
-    <header className="flex h-16 w-full items-center justify-between bg-background px-4 md:px-6">
+    <header className="flex h-16 w-full items-center justify-between bg-background px-4 md:px-6 border-[1px] shadow-sm">
       <nav className="flex items-center gap-6">
         <Link
           href="/"
@@ -19,18 +15,11 @@ export default function Navbar() {
           prefetch={false}
         >
           <MountainIcon className="h-6 w-6" />
-          <span className="sr-only">Acme Inc</span>
+          <span className="sr-only">Webby</span>
         </Link>
         <div className="hidden gap-6 text-sm font-medium md:flex">
           <Link href="/dashboard" className="text-foreground" prefetch={false}>
             Dashboard
-          </Link>
-          <Link
-            href="/settings"
-            className="text-muted-foreground"
-            prefetch={false}
-          >
-            Settings
           </Link>
         </div>
       </nav>
@@ -49,15 +38,6 @@ export default function Navbar() {
         >
           Sign Up
         </Link>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="rounded-full"
-          onClick={handleLogout}
-        >
-          <LogOutIcon className="h-5 w-5" />
-          <span className="sr-only">Logout</span>
-        </Button>
       </div>
     </header>
   );

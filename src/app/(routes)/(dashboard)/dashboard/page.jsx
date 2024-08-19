@@ -1,5 +1,4 @@
 import { auth } from "@/auth";
-import LogoutButton from "@/app/(auth)/components/LogoutButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -19,7 +18,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex min-h-screen">
-      <div className="flex-1 bg-gray-100">
+      <div className="flex-1 ">
         <pre>{JSON.stringify(session, null, 2)}</pre>
         <div className="grid gap-6 p-6">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">

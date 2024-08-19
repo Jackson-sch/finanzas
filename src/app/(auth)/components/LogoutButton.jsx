@@ -2,6 +2,7 @@
 
 import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
+import { LogOutIcon } from "lucide-react";
 
 export default function LogoutButton() {
   const handleLogout = async () => {
@@ -9,5 +10,15 @@ export default function LogoutButton() {
       callbackUrl: "/login",
     });
   };
-  return <Button onClick={handleLogout}>LogOut</Button>;
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="rounded-full"
+      onClick={handleLogout}
+    >
+      <LogOutIcon className="h-5 w-5" />
+    </Button>
+  );
 }

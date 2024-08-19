@@ -91,8 +91,7 @@ export default function FormRegister() {
         setError(response.error);
         toast({
           title: "Error",
-          description:
-            "Hubo un error al registrar. Por favor, intenta de nuevo.",
+          description: response.error,
           variant: "destructive",
         });
       } else {
