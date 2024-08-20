@@ -57,8 +57,6 @@ export default function FormLogin({ isVerified, OAuthAccountNotLinked }) {
       }
     });
   };
-  
-
 
   return (
     <div>
@@ -86,7 +84,11 @@ export default function FormLogin({ isVerified, OAuthAccountNotLinked }) {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="shadcn@example.com" {...field} />
+                    <Input
+                      type="email"
+                      placeholder="shadcn@example.com"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -102,7 +104,12 @@ export default function FormLogin({ isVerified, OAuthAccountNotLinked }) {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="********" {...field} />
+                    <Input
+                      {...field}
+                      type="password"
+                      placeholder="********"
+                      autoComplete="current-password"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -120,22 +127,6 @@ export default function FormLogin({ isVerified, OAuthAccountNotLinked }) {
           </p>
 
           <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-neutral-300 to-transparent dark:via-neutral-700" />
-
-          <div className="flex w-full items-center justify-center gap-4">
-            <Button
-              type="button"
-              variant="outline"
-              
-            >
-              <IconBrandGithub />
-              Sign in with Github
-            </Button>
-
-              <Button type="submit" variant="secondary">
-                <IconBrandGoogleFilled stroke={1} />
-                Sign in with Google
-              </Button>
-          </div>
         </form>
       </Form>
     </div>

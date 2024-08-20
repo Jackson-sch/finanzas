@@ -2,18 +2,12 @@
 
 import { dbConnect } from "@/lib/mongoose";
 import User from "@/models/User/User";
-import { redirect } from "next/navigation";
 import { hash } from "bcryptjs";
 import { signIn } from "@/auth";
-import { AuthError, CredentialsSignin } from "next-auth";
+import { redirect } from "next/navigation";
 
 const registerActions = async (formData) => {
-  const firstName = formData.firstName;
-  const lastName = formData.lastName;
-  const email = formData.email;
-  const password = formData.password;
-
-  console.log("🚀 ~ Register ~ name:", firstName, lastName, email, password);
+  const { firstName, lastName, email, password } = formData;
 
   if (!firstName || !lastName || !email || !password) {
     throw new Error("Por favor, completa todos los campos");
@@ -34,6 +28,7 @@ const registerActions = async (formData) => {
     email,
     password: hashedPassword,
   });
+ /*  redirect("/login"); */
 
   // Autenticar al usuario
   await signIn("credentials", {
@@ -58,20 +53,19 @@ const loginAction = async (formData) => {
 
     // Verifica si hubo un error en la autenticación
     if (result?.error) {
-      if (result.error === "CredentialsSignin") {
-        return { error: "Correo no registrado o contraseña incorrecta" };
-      } else {
-        return {
-          error: "Ocurrió un error inesperado. Por favor, intenta de nuevo.",
-        };
-      }
+      const errorMessage =
+        result.error === "CredentialsSignin"
+          ? "Correo no registrado o contraseña incorrecta"
+          : "Ocurrió un error inesperado. Por favor, intenta de nuevo.";
+      return { error: errorMessage };
     }
     return result;
   } catch (error) {
-    if (error instanceof AuthError) {
-      return { error: error.cause?.err?.message };
-    }
-    return { error: "error 500" };
+    return {
+      error:
+        error.message ||
+        "Error interno en el servidor. Por favor, intenta de nuevo.",
+    };
   }
 };
 

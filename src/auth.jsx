@@ -6,7 +6,6 @@ import { dbConnect } from "./lib/mongoose";
 import User from "./models/User/User";
 
 import { compare } from "bcryptjs";
-import { loginSchema } from "./lib/zod";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -99,42 +98,43 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
 
     signIn: async ({ user, account }) => {
-      if (account?.provider === "google") {
-        try {
-          const { email, name, image, id } = user;
-          await dbConnect();
+      console.log("🚀 ~ signIn: ~ user:", {user, account});
+
+      try {
+        await dbConnect();
+
+        if (account?.provider === "google" || account?.provider === "github") {
+          const email = user.email;
+          const name = user.name || "";
+          const image = user.image;
+          const authProviderId = user.id;
+
+          // Manejar nombres completos si es necesario dividir en firstName y lastName
+          const [firstName, lastName] = name.split(" ");
+
           const alreadyUser = await User.findOne({ email });
 
           if (!alreadyUser) {
-            await User.create({ email, name, image, authProviderId: id });
-          } else {
-            return true;
+            existingUser = await User.create({
+              email,
+              firstName: firstName || "",
+              lastName: lastName || "",
+              image,
+              authProviderId,
+            });
           }
-        } catch (error) {
-          throw new Error("Error while creating user");
+
+          return true;
         }
-      }
 
-      if (account?.provider === "github") {
-        try {
-          const { email, name, image, id } = user;
-          await dbConnect();
-          const alreadyUser = await User.findOne({ email });
-
-          if (!alreadyUser) {
-            await User.create({ email, name, image, authProviderId: id });
-          } else {
-            return true;
-          }
-        } catch (error) {
-          throw new Error("Error while creating user");
+        if (account?.provider === "credentials") {
+          return true;
         }
-      }
 
-      if (account?.provider === "credentials") {
-        return true;
-      } else {
         return false;
+      } catch (error) {
+        console.error("Error en SignIn callback:", error);
+        throw new Error("Error en SignIn callback");
       }
     },
   },
