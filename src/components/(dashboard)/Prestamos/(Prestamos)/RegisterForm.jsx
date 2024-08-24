@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -9,10 +10,17 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
@@ -20,51 +28,54 @@ import {
 } from "@/components/ui/popover";
 import { CalendarDaysIcon } from "lucide-react";
 import { CardPayment } from "../CardPayment";
-import { loanSchema } from "@/lib/validaciones/loan/load";
-import { useState } from "react";
+import { loanSchema } from "@/lib/validaciones/loan/loan";
 
-export default function RegisterForm() {
-  // Uso del hook useForm para manejar el estado del formulario
+export default function RegisterForm({ onSubmit, onSimulator, loans }) {
   const form = useForm({
     resolver: zodResolver(loanSchema),
     defaultValues: {
       borrower: "",
       amount: "",
+      interestYear: "",
       interestRate: "",
-      duration: "",
+      durationYears: "",
+      durationMonths: "",
       date: "",
+      paymentFrequency: "",
     },
   });
 
-  const [fechaPago, setFechaPago] = useState(null);
   const [fechaInicio, setFechaInicio] = useState(null);
 
-  const handleSubmit = async (data) => {
-    console.log(data);
-    try {
-      const response = await fetch("/api/loan", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-      const result = await response.json();
-      console.log(result);
-    } catch (error) {
-      console.log(error);
-      
+  const { watch, setValue } = form;
+  const interestYear = watch("interestYear");
+  const durationYear = watch("durationYears");
+  const durationMonth = watch("durationMonths");
+
+  useEffect(() => {
+    if (interestYear) {
+      const interestRate = interestYear / 12;
+      setValue("interestRate", interestRate.toFixed(2));
     }
-  };
+  }, [interestYear, setValue]);
+
+  useEffect(() => {
+    if (durationYear || durationMonth) {
+      const totalDurationMonths =
+        (durationYear || 0) * 12 + (durationMonth || 0);
+      setValue("durationMonths", totalDurationMonths);
+    }
+  }, [durationYear, setValue]);
+
   return (
     <CardPayment
       title="Registro de Préstamo"
-      description="Ingrese los detalles del préstamo que desea registrarse."
+      description="Ingrese los detalles del préstamo que desea registrar."
     >
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(handleSubmit)}
-          className="grid items-start gap-4"
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="grid items-start gap-6"
         >
           <div className="grid grid-cols-2 gap-2">
             <FormField
@@ -88,6 +99,7 @@ export default function RegisterForm() {
                   <FormLabel>Monto del préstamo</FormLabel>
                   <FormControl>
                     <Input
+                      type="number"
                       placeholder="Ingresar monto del préstamo"
                       {...field}
                     />
@@ -97,31 +109,35 @@ export default function RegisterForm() {
               )}
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-2">
             <FormField
               control={form.control}
-              name="interestRate"
+              name="interestYear"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tasa de interés</FormLabel>
+                  <FormLabel>Tasa de interés anual</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ingresar tasa de interés" {...field} />
+                    <Input
+                      type="number"
+                      placeholder="Ingresar tasa de interés"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
-              name="duration"
+              name="durationYears"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Plazo de préstamo</FormLabel>
+                  <FormLabel>
+                    Plazo <strong>(años)</strong>
+                  </FormLabel>
                   <FormControl>
                     <Input
+                      type="number"
                       placeholder="Ingresar plazo de préstamo"
                       {...field}
                     />
@@ -130,7 +146,48 @@ export default function RegisterForm() {
                 </FormItem>
               )}
             />
-
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <FormField
+              control={form.control}
+              name="interestRate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tasa de interés mensual</FormLabel>
+                  <FormControl>
+                    <Input
+                      readOnly
+                      type="number"
+                      placeholder="Ingresar tasa de interés"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="durationMonths"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Plazo <strong>(meses)</strong>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      readOnly
+                      type="number"
+                      placeholder="Ingresar plazo de préstamo"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="date"
@@ -154,10 +211,13 @@ export default function RegisterForm() {
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         mode="single"
-                        select={field.value}
+                        selected={fechaInicio}
                         onSelect={(date) => {
-                          setFechaInicio(date);
-                          field.onChange(date);
+                          if (date) {
+                            const dateString = date.toISOString().split("T")[0];
+                            setFechaInicio(date);
+                            field.onChange(dateString);
+                          }
                         }}
                       />
                     </PopoverContent>
@@ -166,94 +226,43 @@ export default function RegisterForm() {
                 </FormItem>
               )}
             />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
-              name="date"
+              name="paymentFrequency"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Fecha de pago</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start font-normal"
-                      >
-                        <CalendarDaysIcon className="mr-2 h-4 w-4" />
-                        <span id="fechaPago">
-                          {fechaPago
-                            ? fechaPago.toLocaleDateString()
-                            : "Selecciona la fecha"}
-                        </span>
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        select={field.value ? new Date(field.value) : null}
-                        onSelect={(date) => {
-                          const dateString = date.toISOString().split('T')[0]; // Convertir la fecha a string en formato 'YYYY-MM-DD'
-                          setFechaPago(date);
-                          field.onChange(dateString);
-                        }}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <FormLabel>Frecuencia de pago</FormLabel>
+                  <FormControl>
+                    <Select
+                      value={field.value}
+                      onValueChange={(value) => field.onChange(value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Frecuencia de pago">
+                          {field.value || "Selecciona una opción"}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Mensual">Mensual</SelectItem>
+                        <SelectItem value="Trimestral">Trimestral</SelectItem>
+                        <SelectItem value="Semestral">Semestral</SelectItem>
+                        <SelectItem value="Anual">Anual</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
-          <Button type="submit">Registrar préstamo</Button>
+          <div className="flex items-center justify-end gap-4">
+            <Button type="button" variant="outline" onClick={() => onSimulator(form.getValues())}>
+              Simular Préstamo
+            </Button>
+            <Button type="submit">Registrar Préstamo</Button>
+          </div>
         </form>
-        
       </Form>
-
-      {/* <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="term" className="flex gap-1">
-            Plazo de préstamo{" "}
-            <p className="text-xs font-light text-foreground">(meses)</p>
-          </Label>
-          <Input
-            id="term"
-            type="number"
-            placeholder="Ingresar plazo de préstamo"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="start-date">Fecha de inicio</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="w-full justify-start font-normal"
-              >
-                <CalendarDaysIcon className="mr-2 h-4 w-4" />
-                <span id="date-display">Selecciona la fecha</span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar mode="single" />
-            </PopoverContent>
-          </Popover>
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="borrower">Prestataria</Label>
-          <Input
-            id="borrower"
-            placeholder="Ingrese el nombre del prestatario"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="lender">Prestadora</Label>
-          <Input id="lender" placeholder="Ingrese el nombre del prestamista" />
-        </div>
-      </div> */}
     </CardPayment>
   );
 }

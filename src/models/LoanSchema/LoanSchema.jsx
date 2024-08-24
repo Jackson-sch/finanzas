@@ -1,28 +1,46 @@
-import { Schema, model, models } from 'mongoose';
+import { Schema, model, models } from "mongoose";
 
 const LoanSchema = new Schema({
   borrower: {
+    //Prestatario
     type: String,
-    required: true
+    required: true,
   },
   amount: {
+    //Monto
     type: Number,
-    required: true
+    required: true,
+  },
+  interestYear: {
+    //Tasa de interés anual
+    type: Number,
+    required: true,
   },
   interestRate: {
+    //Tasa de interés mensual
     type: Number,
-    required: true
+    required: true,
   },
-  duration: {
+  durationYears: {
+    //Plazo Years
     type: Number,
-    required: true
+    required: true,
+  },
+  durationMonths: {
+    //Plazo Months
+    type: Number,
+    required: true,
   },
   date: {
+    //Fecha
     type: Date,
-    required: true
-  }
+    required: true,
+  },
+  paymentFrequency: {
+    //Frecuencia de pago
+    type: String,
+    required: true,
+  },
 });
 
-export default models?.Loan || model('Loan', LoanSchema);
-
-
+export default models?.Loan || model("Loan", LoanSchema);
