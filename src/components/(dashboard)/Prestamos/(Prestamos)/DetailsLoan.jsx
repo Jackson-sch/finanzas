@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
 export default function DetailsLoan({ simulatorData }) {
-  console.log("🚀 ~ DetailsLoan ~ simulatorData:", simulatorData);
   if (!simulatorData) {
     return (
       <Card>
@@ -34,7 +33,9 @@ export default function DetailsLoan({ simulatorData }) {
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1">
           <Label>Prestatario</Label>
-          <p className="text-lg font-medium capitalize">{simulatorData.borrower}</p>
+          <p className="text-lg font-medium capitalize">
+            {simulatorData.borrower}
+          </p>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -63,13 +64,13 @@ export default function DetailsLoan({ simulatorData }) {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label>Tasa de interés efectiva</Label>
-            <p className="text-lg font-medium">
-              {simulatorData.interestRate}%
-            </p>
+            <p className="text-lg font-medium">{simulatorData.interestRate}%</p>
           </div>
           <div>
             <Label>Monto de pago mensual</Label>
-            <p className="text-lg font-medium">S/ {simulatorData.paymentAmount}</p>
+            <p className="text-lg font-medium">
+              S/ {simulatorData.paymentAmount}
+            </p>
           </div>
         </div>
         <Separator />

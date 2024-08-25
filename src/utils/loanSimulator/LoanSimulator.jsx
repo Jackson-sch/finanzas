@@ -51,12 +51,18 @@ export const getTotalAmount = (loanAmount, paymentAmount, totalPayments) => {
   return paymentAmount * totalPayments;
 };
 
+// Calcular el monto restante del préstamo después de ciertos pagos
+const calculateRemainingAmount = (loanAmount, paymentAmount, paymentNumber) => {
+  const totalPaid = paymentAmount * paymentNumber;
+  return loanAmount - totalPaid;
+};
+
 // Función principal para calcular los datos del simulador de préstamos
-export const calculateSimulatorData = (formValues) => {
-  const loanAmount = parseFloat(formValues.amount);
-  const interestRate = parseFloat(formValues.interestRate);
-  const durationMonths = parseInt(formValues.totalDurationMonths, 10);
-  const paymentFrequency = formValues.paymentFrequency;
+export const calculateSimulatorData = (loanData, paymentNumber = 0) => {
+  const loanAmount = parseFloat(loanData.amount);
+  const interestRate = parseFloat(loanData.interestRate);
+  const durationMonths = parseInt(loanData.durationMonths, 10);
+  const paymentFrequency = loanData.paymentFrequency;
 
   if (isNaN(loanAmount) || isNaN(interestRate) || isNaN(durationMonths)) {
     throw new Error("Datos de entrada no válidos para el cálculo del préstamo");
@@ -80,11 +86,17 @@ export const calculateSimulatorData = (formValues) => {
     paymentAmount,
     totalPayments,
   ).toFixed(2);
-  console.log("🚀 ~ calculateSimulatorData ~ totalAmount:", totalAmount);
+
+  //Calcula el monto restante del préstamo después de ciertos pagos
+  const remainingAmount = calculateRemainingAmount(
+    loanAmount,
+    paymentAmount,
+    paymentNumber,
+  ).toFixed(2);
 
   return {
-    borrower: formValues.borrower,
-    interestYear: formValues.interestYear,
+    borrower: loanData.borrower,
+    interestYear: loanData.interestYear,
     interestRate,
     equivalentInterestRate,
     loanAmount,
@@ -93,5 +105,6 @@ export const calculateSimulatorData = (formValues) => {
     paymentAmount,
     totalPayments,
     totalAmount,
+    remainingAmount,
   };
 };

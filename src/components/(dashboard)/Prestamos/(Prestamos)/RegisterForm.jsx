@@ -30,7 +30,7 @@ import { CalendarDaysIcon } from "lucide-react";
 import { CardPayment } from "../CardPayment";
 import { loanSchema } from "@/lib/validaciones/loan/loan";
 
-export default function RegisterForm({ onSubmit, onSimulator, loans }) {
+export default function RegisterForm({ onSubmit, onSimulator }) {
   const form = useForm({
     resolver: zodResolver(loanSchema),
     defaultValues: {
@@ -52,6 +52,11 @@ export default function RegisterForm({ onSubmit, onSimulator, loans }) {
   const durationYear = watch("durationYears");
   const durationMonth = watch("durationMonths");
 
+  const handleSubmit = async (data) => {
+    await onSubmit(data);
+    form.reset();
+  };
+
   useEffect(() => {
     if (interestYear) {
       const interestRate = interestYear / 12;
@@ -61,9 +66,13 @@ export default function RegisterForm({ onSubmit, onSimulator, loans }) {
 
   useEffect(() => {
     if (durationYear || durationMonth) {
-      const totalDurationMonths =
-        (durationYear || 0) * 12 + (durationMonth || 0);
-      setValue("durationMonths", totalDurationMonths);
+      const yearValue = Number(durationYear) || 0;
+      const monthValue = Number(durationMonth) || 0;
+
+      const newDurationMonths = yearValue * 12 + monthValue;
+      if (newDurationMonths !== durationMonth) {
+        setValue("durationMonths", newDurationMonths);
+      }
     }
   }, [durationYear, setValue]);
 
@@ -74,7 +83,7 @@ export default function RegisterForm({ onSubmit, onSimulator, loans }) {
     >
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit(handleSubmit)}
           className="grid items-start gap-6"
         >
           <div className="grid grid-cols-2 gap-2">
@@ -120,6 +129,7 @@ export default function RegisterForm({ onSubmit, onSimulator, loans }) {
                     <Input
                       type="number"
                       placeholder="Ingresar tasa de interés"
+                      value={Number(field.value)}
                       {...field}
                     />
                   </FormControl>
@@ -256,7 +266,11 @@ export default function RegisterForm({ onSubmit, onSimulator, loans }) {
             />
           </div>
           <div className="flex items-center justify-end gap-4">
-            <Button type="button" variant="outline" onClick={() => onSimulator(form.getValues())}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onSimulator(form.getValues())}
+            >
               Simular Préstamo
             </Button>
             <Button type="submit">Registrar Préstamo</Button>

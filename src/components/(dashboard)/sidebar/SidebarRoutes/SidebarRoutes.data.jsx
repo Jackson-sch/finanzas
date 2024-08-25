@@ -1,4 +1,4 @@
-import { Calendar, Car, DollarSign, Heart, SquareGanttChart, SquareKanban, Wallet } from "lucide-react";
+import { Calendar, Car, ClipboardPen, DollarSign, HandCoins, Heart, SquareGanttChart, SquareKanban, Wallet, Wallet2 } from "lucide-react";
 
 export const dataGeneralSidebar = [
   {
@@ -10,6 +10,11 @@ export const dataGeneralSidebar = [
     icon: DollarSign,
     label: "Prestamos",
     href: "/prestamos",
+  },
+  {
+    icon: HandCoins,
+    label: "Pagos de préstamos",
+    href: "/pagos-prestamos",
   },
   {
     icon: Wallet,
