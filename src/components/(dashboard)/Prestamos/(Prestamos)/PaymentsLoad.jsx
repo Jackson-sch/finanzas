@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -54,6 +54,7 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
 
   const [fechaPago, setFechaPago] = useState(null);
   const [selectedLoan, setSelectedLoan] = useState(null);
+  const [filteredLoans, setFilteredLoans] = useState([]);
 
   const handleLoanChange = (loanId) => {
     const loan = loans.find((loan) => loan._id === loanId);
@@ -71,7 +72,7 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
       const existingPayment = payments.find(
         (payment) =>
           payment.loanId === selectedLoan._id &&
-          payment.paymentNumber === parseInt(paymentNumber, 10),
+          payment.paymentNumber === parseInt(paymentNumber, 10)
       );
 
       if (existingPayment) {
@@ -95,11 +96,15 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
     }
   };
 
-  //Filtrar los prestamos que aun tienen saldo pendiente
-  const filteredLoans = loans.filter((loan) => {
-    const loanData = calculateSimulatorData(loan);
-    return parseFloat(loanData.remainingAmount) > 0;
-  });
+  useEffect(() => {
+    // Filtrar los préstamos que aún tienen saldo pendiente
+    const loansWithPendingBalance = loans.filter((loan) => {
+      const loanData = calculateSimulatorData(loan);
+      return parseFloat(loanData.remainingAmount) > 0;
+    });
+
+    setFilteredLoans(loansWithPendingBalance);
+  }, [loans]);
 
   return (
     <Card>
@@ -132,8 +137,8 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
                             <SelectValue placeholder="Seleccione un prestatario">
                               {capitalize(
                                 filteredLoans.find(
-                                  (loan) => loan._id === field.value,
-                                )?.borrower || "Selecciona una opción",
+                                  (loan) => loan._id === field.value
+                                )?.borrower || "Selecciona una opción"
                               )}
                             </SelectValue>
                           </SelectTrigger>
@@ -225,7 +230,7 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
                   name="date"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Fecha de inicio</FormLabel>
+                      <FormLabel>Fecha de pago</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
                           <Button
