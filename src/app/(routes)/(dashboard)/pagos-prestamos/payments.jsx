@@ -40,7 +40,7 @@ export default function Payments() {
           description: "El pago ha sido registrado exitosamente",
           status: "success",
         });
-        setLoans([...loans, data]);
+        setPayments([...payments, data]);
       } else {
         toast({
           title: "Error",
@@ -66,6 +66,7 @@ export default function Payments() {
         <div>
           <PaymentsLoad
             loans={loans}
+            payments={payments}
             handleSubmitPayment={handleSubmitPayment}
           />
         </div>

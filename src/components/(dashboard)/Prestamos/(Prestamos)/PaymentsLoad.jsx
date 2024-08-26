@@ -36,8 +36,12 @@ import { Calendar } from "@/components/ui/calendar";
 import { CalendarDaysIcon } from "lucide-react";
 import { paymentSchema } from "@/lib/validaciones/loan/loan";
 import capitalize from "@/utils/capitalize";
+import { calculateSimulatorData } from "@/utils/loanSimulator/LoanSimulator";
+import { useToast } from "@/components/ui/use-toast";
 
-export default function PaymentsLoad({ loans, handleSubmitPayment }) {
+export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
+  const { toast } = useToast();
+
   const form = useForm({
     resolver: zodResolver(paymentSchema),
     defaultValues: {
@@ -49,11 +53,53 @@ export default function PaymentsLoad({ loans, handleSubmitPayment }) {
   });
 
   const [fechaPago, setFechaPago] = useState(null);
+  const [selectedLoan, setSelectedLoan] = useState(null);
+
+  const handleLoanChange = (loanId) => {
+    const loan = loans.find((loan) => loan._id === loanId);
+    setSelectedLoan(loan);
+
+    // Actualizar el campo amount con el monto de la cuota mensual del préstamo seleccionado
+    if (loan) {
+      const loanData = calculateSimulatorData(loan);
+      form.setValue("amount", loanData.paymentAmount);
+    }
+  };
+
+  const validatePaymentNumber = (paymentNumber) => {
+    if (selectedLoan) {
+      const existingPayment = payments.find(
+        (payment) =>
+          payment.loanId === selectedLoan._id &&
+          payment.paymentNumber === parseInt(paymentNumber, 10),
+      );
+
+      if (existingPayment) {
+        toast({
+          title: "Número de pago duplicado",
+          description: "El número de pago ya ha sido registrado",
+          status: "error",
+        });
+        return false;
+      }
+    }
+    return true;
+  };
 
   const handleSubmit = (data) => {
-    handleSubmitPayment(data);
-    form.reset();
+    if (validatePaymentNumber(data.paymentNumber)) {
+      handleSubmitPayment(data);
+      form.reset();
+      setFechaPago(null);
+      setSelectedLoan(null);
+    }
   };
+
+  //Filtrar los prestamos que aun tienen saldo pendiente
+  const filteredLoans = loans.filter((loan) => {
+    const loanData = calculateSimulatorData(loan);
+    return parseFloat(loanData.remainingAmount) > 0;
+  });
 
   return (
     <Card>
@@ -77,26 +123,48 @@ export default function PaymentsLoad({ loans, handleSubmitPayment }) {
                       <FormControl>
                         <Select
                           value={field.value}
-                          onValueChange={(value) => field.onChange(value)}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            handleLoanChange(value);
+                          }}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Seleccione un prestatario">
                               {capitalize(
-                                loans.find((loan) => loan._id === field.value)
-                                  ?.borrower || "Selecciona una opción",
+                                filteredLoans.find(
+                                  (loan) => loan._id === field.value,
+                                )?.borrower || "Selecciona una opción",
                               )}
                             </SelectValue>
                           </SelectTrigger>
                           <SelectContent>
-                            {loans.map((loan) => (
-                              <SelectItem
-                                key={loan._id}
-                                value={loan._id}
-                                className="capitalize"
-                              >
-                                {loan.borrower}
-                              </SelectItem>
-                            ))}
+                            {filteredLoans.map((loan) => {
+                              const loanData = calculateSimulatorData(loan);
+                              return (
+                                <SelectItem
+                                  key={loan._id}
+                                  value={loan._id}
+                                  className="capitalize"
+                                >
+                                  <div>
+                                    <h4 className="font-semibold">
+                                      {loan.borrower}
+                                    </h4>
+                                    <div className="flex justify-between gap-2 text-xs">
+                                      <p>
+                                        Monto: <strong>{loan.amount}</strong>
+                                      </p>
+                                      <p>
+                                        Cuota mensual:{" "}
+                                        <strong>
+                                          {loanData.paymentAmount}
+                                        </strong>
+                                      </p>
+                                    </div>
+                                  </div>
+                                </SelectItem>
+                              );
+                            })}
                           </SelectContent>
                         </Select>
                       </FormControl>
@@ -114,12 +182,14 @@ export default function PaymentsLoad({ loans, handleSubmitPayment }) {
                       <FormLabel>Monto del pago</FormLabel>
                       <FormControl>
                         <Input
+                          {...field}
                           type="number"
                           placeholder="Ingresar monto del pago"
-                          {...field}
+                          value={field.value}
                           onChange={(e) => {
                             field.onChange(Number(e.target.value));
                           }} // Convertir a número
+                          readOnly
                         />
                       </FormControl>
                       <FormMessage />

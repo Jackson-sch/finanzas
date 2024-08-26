@@ -16,7 +16,7 @@ export const loanSchema = object({
   durationYears: string({
     required_error: "La duración del préstamo es obligatoria.",
   }),
-  durationMonths: number({
+  durationMonths: coerce.number({
     required_error: "La duración del préstamo es obligatoria.",
   }).int(),
   date: string({

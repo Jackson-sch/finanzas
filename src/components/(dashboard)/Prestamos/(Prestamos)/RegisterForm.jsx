@@ -186,7 +186,6 @@ export default function RegisterForm({ onSubmit, onSimulator }) {
                   </FormLabel>
                   <FormControl>
                     <Input
-                      readOnly
                       type="number"
                       placeholder="Ingresar plazo de préstamo"
                       {...field}

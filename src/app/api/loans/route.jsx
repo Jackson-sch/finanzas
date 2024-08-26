@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 export async function POST(request) {
   try {
     await dbConnect();
-    const body = await request.json();
+    const body = await request.json()
     const newLoan = new Loan(body);
     const savedLoan = await newLoan.save();
     return NextResponse.json(savedLoan, { status: 201 });
@@ -17,6 +17,6 @@ export async function POST(request) {
 
 export async function GET() {
   await dbConnect();
-  const loans = await Loan.find({});
+  const loans = await Loan.find({}).sort({ _id: -1 });;
   return NextResponse.json(loans, { status: 200 });
 }
