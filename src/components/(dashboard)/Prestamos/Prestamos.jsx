@@ -122,8 +122,8 @@ export default function Prestamos() {
             loans={loans}
             handleSubmitPayment={handleSubmitPayment}
           />
-        </div> */}
-        <Separator className="my-6" />
+        </div> 
+        <Separator className="my-6" />*/}
         <div className="mb-5">
           <ListLoans loans={loans} />
         </div>

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { format, parseISO } from "date-fns";
+import { es } from "date-fns/locale";
 
 import {
   Form,
@@ -29,6 +31,7 @@ import {
 import { CalendarDaysIcon } from "lucide-react";
 import { CardPayment } from "../CardPayment";
 import { loanSchema } from "@/lib/validaciones/loan/loan";
+import { toast } from "@/components/ui/use-toast";
 
 export default function RegisterForm({ onSubmit, onSimulator }) {
   const form = useForm({
@@ -53,8 +56,24 @@ export default function RegisterForm({ onSubmit, onSimulator }) {
   const durationMonth = watch("durationMonths");
 
   const handleSubmit = async (data) => {
-    await onSubmit(data);
-    form.reset();
+    try {
+      // Asegurarse de que la fecha esté en formato ISO
+      if (data.date) {
+        data.date = new Date(data.date).toISOString();
+      }
+      await onSubmit(data);
+      form.reset();
+      toast({
+        title: "Préstamo registrado",
+        description: "El préstamo se ha registrado correctamente.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Hubo un problema al registrar el préstamo.",
+        variant: "destructive",
+      });
+    }
   };
 
   useEffect(() => {
@@ -86,7 +105,7 @@ export default function RegisterForm({ onSubmit, onSimulator }) {
           onSubmit={form.handleSubmit(handleSubmit)}
           className="grid items-start gap-6"
         >
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="borrower"
@@ -118,13 +137,13 @@ export default function RegisterForm({ onSubmit, onSimulator }) {
               )}
             />
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="interestYear"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tasa de interés anual</FormLabel>
+                  <FormLabel>Tasa de interés anual (%)</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -139,16 +158,15 @@ export default function RegisterForm({ onSubmit, onSimulator }) {
             />
             <FormField
               control={form.control}
-              name="durationYears"
+              name="interestRate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    Plazo <strong>(años)</strong>
-                  </FormLabel>
+                  <FormLabel>Tasa de interés mensual (%)</FormLabel>
                   <FormControl>
                     <Input
+                      readOnly
                       type="number"
-                      placeholder="Ingresar plazo de préstamo"
+                      placeholder="Calculado automáticamente"
                       {...field}
                     />
                   </FormControl>
@@ -157,18 +175,19 @@ export default function RegisterForm({ onSubmit, onSimulator }) {
               )}
             />
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
-              name="interestRate"
+              name="durationYears"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tasa de interés mensual</FormLabel>
+                  <FormLabel>
+                  Plazo (años)
+                  </FormLabel>
                   <FormControl>
                     <Input
-                      readOnly
                       type="number"
-                      placeholder="Ingresar tasa de interés"
+                      placeholder="Ingresar plazo en años"
                       {...field}
                     />
                   </FormControl>
@@ -182,12 +201,12 @@ export default function RegisterForm({ onSubmit, onSimulator }) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Plazo <strong>(meses)</strong>
+                  Plazo total (meses)
                   </FormLabel>
                   <FormControl>
                     <Input
                       type="number"
-                      placeholder="Ingresar plazo de préstamo"
+                      placeholder="Calculado automáticamente"
                       {...field}
                     />
                   </FormControl>
@@ -197,60 +216,70 @@ export default function RegisterForm({ onSubmit, onSimulator }) {
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="date"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Fecha de inicio</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start font-normal"
-                      >
-                        <CalendarDaysIcon className="mr-2 h-4 w-4" />
-                        <span id="date-display">
-                          {fechaInicio
-                            ? fechaInicio.toLocaleDateString()
-                            : "Selecciona la fecha"}
-                        </span>
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={fechaInicio}
-                        onSelect={(date) => {
-                          if (date) {
-                            const dateString = date.toISOString().split("T")[0];
-                            setFechaInicio(date);
-                            field.onChange(dateString);
+            <div className="flex flex-col justify-end">
+              <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Fecha de inicio</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            className={`w-full pl-3 text-left font-normal ${
+                              !field.value && "text-muted-foreground"
+                            }`}
+                          >
+                            {field.value ? (
+                              format(parseISO(field.value), "PPP", {
+                                locale: es,
+                              })
+                            ) : (
+                              <span>Selecciona una fecha</span>
+                            )}
+                            <CalendarDaysIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={
+                            field.value ? parseISO(field.value) : undefined
                           }
-                        }}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="paymentFrequency"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Frecuencia de pago</FormLabel>
-                  <FormControl>
+                          onSelect={(date) =>
+                            field.onChange(date?.toISOString())
+                          }
+                          disabled={(date) =>
+                            date > new Date() || date < new Date("1900-01-01")
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div>
+              <FormField
+                control={form.control}
+                name="paymentFrequency"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Frecuencia de pago</FormLabel>
                     <Select
-                      value={field.value}
-                      onValueChange={(value) => field.onChange(value)}
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Frecuencia de pago">
-                          {field.value || "Selecciona una opción"}
-                        </SelectValue>
-                      </SelectTrigger>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona la frecuencia" />
+                        </SelectTrigger>
+                      </FormControl>
                       <SelectContent>
                         <SelectItem value="Mensual">Mensual</SelectItem>
                         <SelectItem value="Trimestral">Trimestral</SelectItem>
@@ -258,11 +287,11 @@ export default function RegisterForm({ onSubmit, onSimulator }) {
                         <SelectItem value="Anual">Anual</SelectItem>
                       </SelectContent>
                     </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
           <div className="flex items-center justify-end gap-4">
             <Button

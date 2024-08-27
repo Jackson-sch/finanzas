@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { format, parseISO } from "date-fns";
+import { es } from "date-fns/locale";
 
 import {
   Form,
@@ -24,6 +26,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { User, CreditCard } from "lucide-react"
 
 import { Input } from "@/components/ui/input";
 import {
@@ -72,7 +77,7 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
       const existingPayment = payments.find(
         (payment) =>
           payment.loanId === selectedLoan._id &&
-          payment.paymentNumber === parseInt(paymentNumber, 10)
+          payment.paymentNumber === parseInt(paymentNumber, 10),
       );
 
       if (existingPayment) {
@@ -89,6 +94,10 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
 
   const handleSubmit = (data) => {
     if (validatePaymentNumber(data.paymentNumber)) {
+      // Asegurarse de que la fecha esté en formato ISO
+      if (data.date) {
+        data.date = new Date(data.date).toISOString();
+      }
       handleSubmitPayment(data);
       form.reset();
       setFechaPago(null);
@@ -108,6 +117,10 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
     setFilteredLoans(loansWithPendingBalance);
   }, [loans]);
 
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'PEN' }).format(amount)
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -125,61 +138,64 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
                   control={form.control}
                   name="loanId"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="space-y-2">
                       <FormLabel>Prestatario</FormLabel>
-                      <FormControl>
-                        <Select
-                          value={field.value}
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            handleLoanChange(value);
-                          }}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccione un prestatario">
-                              {capitalize(
-                                filteredLoans.find(
-                                  (loan) => loan._id === field.value
-                                )?.borrower || "Selecciona una opción"
-                              )}
-                            </SelectValue>
+                      <Select
+                        value={field.value}
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          handleLoanChange(value);
+                        }}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Seleccione un prestatario" />
                           </SelectTrigger>
-                          <SelectContent>
+                        </FormControl>
+                        <SelectContent>
+                          <ScrollArea className="h-[300px] pr-4">
                             {filteredLoans.map((loan) => {
                               const loanData = calculateSimulatorData(loan);
                               return (
                                 <SelectItem
                                   key={loan._id}
                                   value={loan._id}
-                                  className="capitalize"
+                                  className="flex flex-col space-y-1 border-b border-gray-100 py-2 last:border-none"
                                 >
-                                  <div>
-                                    <h4 className="font-semibold">
-                                      {loan.borrower}
-                                    </h4>
-                                    <div className="flex justify-between gap-2 text-xs">
-                                      <p>
-                                        Monto: <strong>{loan.amount}</strong>
-                                      </p>
-                                      <p>
-                                        Cuota mensual:{" "}
-                                        <strong>
-                                          {loanData.paymentAmount}
-                                        </strong>
-                                      </p>
-                                    </div>
+                                  <div className="flex items-center space-x-2">
+                                    <User className="h-4 w-4 text-gray-500" />
+                                    <span className="font-medium">
+                                      {capitalize(loan.borrower)}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center space-x-2 text-sm text-gray-500">
+                                    <Badge
+                                      variant="outline"
+                                      className="font-normal"
+                                    >
+                                      <CreditCard className="mr-1 h-3 w-3" />
+                                      {formatCurrency(loan.amount)}
+                                    </Badge>
+                                    <Badge
+                                      variant="secondary"
+                                      className="font-normal"
+                                    >
+                                      Cuota:{" "}
+                                      {formatCurrency(loanData.paymentAmount)}
+                                    </Badge>
                                   </div>
                                 </SelectItem>
                               );
                             })}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
+                          </ScrollArea>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
+
               <div className="space-y-2">
                 <FormField
                   control={form.control}
@@ -237,29 +253,33 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
                         <PopoverTrigger asChild>
                           <Button
                             variant="outline"
-                            className="w-full justify-start font-normal"
+                            className={`w-full pl-1 text-left font-normal ${
+                              !field.value && "text-muted-foreground"
+                            }`}
                           >
-                            <CalendarDaysIcon className="mr-2 h-4 w-4" />
-                            <span id="date-display">
-                              {fechaPago
-                                ? fechaPago.toLocaleDateString()
-                                : "Selecciona la fecha"}
-                            </span>
+                            {field.value ? (
+                              format(parseISO(field.value), "PPP", {
+                                locale: es,
+                              })
+                            ) : (
+                              <span>Selecciona una fecha</span>
+                            )}
+                            <CalendarDaysIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
-                            selected={fechaPago}
-                            onSelect={(date) => {
-                              if (date) {
-                                const dateString = date
-                                  .toISOString()
-                                  .split("T")[0];
-                                setFechaPago(date);
-                                field.onChange(dateString);
-                              }
-                            }}
+                            selected={
+                              field.value ? parseISO(field.value) : undefined
+                            }
+                            onSelect={(date) =>
+                              field.onChange(date?.toISOString())
+                            }
+                            disabled={(date) =>
+                              date > new Date() || date < new Date("1900-01-01")
+                            }
+                            initialFocus
                           />
                         </PopoverContent>
                       </Popover>

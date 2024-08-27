@@ -62,7 +62,7 @@ export default function Payments() {
       <header className="flex items-center justify-between rounded-md bg-primary px-6 py-4 text-primary-foreground">
         <h1 className="text-2xl font-bold">Gestión pagos de préstamos</h1>
       </header>
-      <main className="flex-1 pt-6">
+      <main className="flex flex-col pt-6 gap-4">
         <div>
           <PaymentsLoad
             loans={loans}
