@@ -100,7 +100,9 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
     // Filtrar los préstamos que aún tienen saldo pendiente
     const loansWithPendingBalance = loans.filter((loan) => {
       const loanData = calculateSimulatorData(loan);
-      return parseFloat(loanData.remainingAmount) > 0;
+      // Convertimos remainingAmount a número antes de compararlo
+      const remainingAmount = parseFloat(loanData.remainingAmount);
+      return remainingAmount > 0;
     });
 
     setFilteredLoans(loansWithPendingBalance);
