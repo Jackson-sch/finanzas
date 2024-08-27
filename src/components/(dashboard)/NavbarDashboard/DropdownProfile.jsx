@@ -70,25 +70,34 @@ export async function DropdownProfile() {
 }
 
 const AvatarProfile = ({ user }) => {
+  console.log("🚀 ~ AvatarProfile ~ user:", user);
   return (
     <div className="flex items-center gap-2 hover:cursor-pointer">
       <div>
         <p className="text-sm font-medium capitalize leading-none tracking-tight text-foreground md:text-base md:font-semibold md:leading-normal md:tracking-normal">
-          {user?.firstName} {user?.lastName}
+          {user.name ? user.name : `${user.firstName} ${user.lastName}`}
         </p>
         <p className="text-xs font-normal leading-none tracking-tight text-muted-foreground">
           {user?.email}
         </p>
       </div>
       <Avatar>
-        {[...Array(8)].map((_, i) => (
+        {user?.image ? (
           <AvatarImage
-            key={i}
-            src={`https://api.dicebear.com/9.x/adventurer/svg?seed=Loki-${i + 1}.jpg`}
-            alt={`Friend ${i + 1}`}
+            src={user.image}
+            alt={`${user.firstName} ${user.lastName}`}
             className="h-10 w-10 rounded-full"
           />
-        ))}
+        ) : (
+          [...Array(8)].map((_, i) => (
+            <AvatarImage
+              key={i}
+              src={`https://api.dicebear.com/9.x/adventurer/svg?seed=Loki-${i + 1}.jpg`}
+              alt={`Friend ${i + 1}`}
+              className="h-10 w-10 rounded-full"
+            />
+          ))
+        )}
         <AvatarFallback></AvatarFallback>
       </Avatar>
     </div>

@@ -38,11 +38,7 @@ export default async function LoginPage({ searchParams }) {
             isVerified={isVerified}
             OAuthAccountNotLinked={OAuthAccountNotLinked}
           />
-          <div className="flex flex-col w-full items-center justify-center gap-4">
-            <ButtonSocial provider="github">
-              <IconBrandGithub className="mr-2 h-4 w-4" />
-              Continuar con GitHub
-            </ButtonSocial>
+          <div className="w-full">
             <ButtonSocial provider="google">
               <IconBrandGoogleFilled className="mr-2 h-4 w-4" />
               Continuar con Google

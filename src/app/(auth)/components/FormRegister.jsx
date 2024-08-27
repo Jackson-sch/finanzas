@@ -37,25 +37,33 @@ export default function FormRegister() {
     },
   });
 
-
   const handleSubmit = async (formData) => {
     setError(null);
     startTransition(async () => {
-      const response = await registerActions(formData);
-      if (response.error) {
-        setError(response.error);
+      try {
+        const response = await registerActions(formData);
+        if (response.error) {
+          setError(response.error);
+          toast({
+            title: "Error",
+            description: response.error,
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Registro exitoso",
+            description: "Su cuenta ha sido creada exitosamente.",
+            duration: 3000,
+          });
+          router.push("/dashboard");
+        }
+      } catch (error) {
+        setError(error.message);
         toast({
           title: "Error",
-          description: response.error,
+          description: error.message,
           variant: "destructive",
         });
-      } else {
-        toast({
-          title: "Registro exitoso",
-          description: "Su cuenta ha sido creada exitosamente.",
-          duration: 3000,
-        });
-        router.push("/dashboard");
       }
     });
   };
