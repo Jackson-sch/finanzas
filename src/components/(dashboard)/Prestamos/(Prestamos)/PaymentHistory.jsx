@@ -100,9 +100,15 @@ export default function PaymentHistory({ payments, loans }) {
                   <TableCell>S/ {loanData.remainingAmount}</TableCell>
                   <TableCell>S/ {loanData.totalAmount}</TableCell>
                   <TableCell>
-                    <Progress value={progress} max={100}>
-                      {progress}%
-                    </Progress>
+                  <div className="relative w-full">
+                      <Progress value={progress} max={100} />
+                      {/* Texto superpuesto */}
+                      <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center text-white text-sm font-semibold"> 
+                      
+                      {/* {progress === 100 ? 'Completado' : ''} */}
+                        {progress}% {/* O puedes poner `S/ {loanData.remainingAmount}` */}
+                      </div>
+                    </div>
                   </TableCell>
                 </TableRow>
               );
