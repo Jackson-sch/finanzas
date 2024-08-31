@@ -1,320 +1,377 @@
-import React, { useState } from 'react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { PlusCircle, Trash2, Edit2 } from 'lucide-react'
+import React, { useEffect, useState } from "react";
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import TransactionForm from "./TransactionForm";
+import { toast } from "@/components/ui/use-toast";
+import {
+  fetchCategories,
+  fetchTags,
+  fetchTransactions,
+} from "@/utils/fetchingData";
+import FinancialSummary from "./FinancialSummary";
+import ListTransactions from "./ListTransactions";
+import Categories from "./Categories";
+import Tags from "./Tags";
+import { set } from "mongoose";
 
 export default function TransactionV2() {
-  const [categories, setCategories] = useState(['Salario', 'Alquiler', 'Entretenimiento'])
-  const [tags, setTags] = useState(['Personal', 'Trabajo'])
-  const [transactions, setTransactions] = useState([])
-  const [newCategory, setNewCategory] = useState('')
-  const [newTag, setNewTag] = useState('')
-  const [newTransaction, setNewTransaction] = useState({
-    type: 'ingreso',
-    amount: 0,
-    category: '',
-    tags: [],
-    description: '',
-    date: ''
-  })
-  const [summaryPeriod, setSummaryPeriod] = useState('mensual')
+  const [transactions, setTransactions] = useState([]);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [tags, setTags] = useState([]);
+  const [summaryPeriod, setSummaryPeriod] = useState("mensual");
+  const [summary, setSummary] = useState({
+    ingresos: 0,
+    egresos: 0,
+    balance: 0,
+  });
+  const [previousSummary, setPreviousSummary] = useState({
+    ingresos: 0,
+    egresos: 0,
+    balance: 0,
+  });
 
-  const addCategory = () => {
-    if (newCategory && !categories.includes(newCategory)) {
-      setCategories([...categories, newCategory])
-      setNewCategory('')
-    }
-  }
-
-  const addTag = () => {
-    if (newTag && !tags.includes(newTag)) {
-      setTags([...tags, newTag])
-      setNewTag('')
-    }
-  }
-
-  const addTransaction = () => {
-    if (newTransaction.amount && newTransaction.category && newTransaction.date) {
-      setTransactions([...transactions, { ...newTransaction, id: Date.now() }])
-      setNewTransaction({
-        type: 'ingreso',
-        amount: 0,
-        category: '',
-        tags: [],
-        description: '',
-        date: ''
-      })
-    }
-  }
-
-  const deleteTransaction = (id) => {
-    setTransactions(transactions.filter(t => t.id !== id))
-  }
-
-  const calculateSummary = () => {
-    const now = new Date()
-    const filteredTransactions = transactions.filter(t => {
-      const transactionDate = new Date(t.date)
-      switch (summaryPeriod) {
-        case 'diario':
-          return transactionDate.toDateString() === now.toDateString()
-        case 'semanal':
-          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-          return transactionDate >= weekAgo
-        case 'mensual':
-          return transactionDate.getMonth() === now.getMonth() && transactionDate.getFullYear() === now.getFullYear()
-        default:
-          return true
+  const addTransaction = async (data) => {
+    try {
+      const response = await fetch("/api/transactions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      if (response.ok) {
+        toast({
+          title: "Transacción registrada",
+          description: "La transacción ha sido registrada exitosamente",
+          status: "success",
+        });
+        const data = await response.json();
+        setTransactions([...transactions, data]);
+        updateSummary([...transactions, data]);
+      } else {
+        toast({
+          title: "Error",
+          description: "Ocurrió un error al registrar la transacción",
+          status: "error",
+        });
       }
-    })
+    } catch (error) {
+      console.error("Error al registrar la transacción:", error.message);
+      toast({
+        title: "Error",
+        description: "Ocurrió un error al registrar la transacción",
+        status: "error",
+      });
+    }
+  };
 
-    const ingresos = filteredTransactions.filter(t => t.type === 'ingreso').reduce((sum, t) => sum + t.amount, 0)
-    const egresos = filteredTransactions.filter(t => t.type === 'egreso').reduce((sum, t) => sum + t.amount, 0)
+  const updateTransaction = async (id, updatedData) => {
+    try {
+      const response = await fetch(`/api/transactions/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedData),
+      });
+      if (response.ok) {
+        toast({
+          title: "Transacción actualizada",
+          description: "La transacción ha sido actualizada exitosamente",
+          status: "success",
+        });
+        const updatedTransaction = await response.json();
+        const updatedTransactions = transactions.map((transaction) =>
+          transaction._id === id ? updatedTransaction : transaction,
+        );
+        setTransactions(updatedTransactions);
+        updateSummary(updatedTransactions);
+        setSelectedTransaction(null);
+      } else {
+        toast({
+          title: "Error",
+          description: "Ocurrió un error al actualizar la transacción",
+          status: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Error al actualizar la transacción:", error.message);
+      toast({
+        title: "Error",
+        description: "Ocurrió un error al actualizar la transacción",
+        status: "error",
+      });
+    }
+  };
 
-    return { ingresos, egresos, balance: ingresos - egresos }
-  }
+  const handleEditTransaction = (transaction) => {
+    setTransactions(transaction);
+  };
 
-  const summary = calculateSummary()
+  const deleteTransaction = async (id) => {
+    try {
+      const response = await fetch(`/api/transactions/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Ocurrió un error al eliminar la transacción");
+      }
+
+      const updatedTransactions = transactions.filter((t) => t._id !== id);
+      toast({
+        title: "Transacción eliminada",
+        description: "La transacción ha sido eliminada correctamente",
+        status: "success",
+      });
+      setTransactions(updatedTransactions);
+      updateSummary(updatedTransactions);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description:
+          "Ocurrió un error al eliminar la transacción " + error.message,
+        status: "error",
+      });
+    }
+  };
+
+  const addCategory = async (data) => {
+    try {
+      const response = await fetch("/api/categories", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        toast({
+          title: "Categoría registrada",
+          description: "La categoría se ha registrado correctamente",
+          status: "success",
+        });
+        setCategories([...categories, data]);
+      } else {
+        toast({
+          title: "Error",
+          description: "Ocurrió un error al registrar la categoría",
+          status: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Error al registrar la categoría:", error.message);
+      toast({
+        title: "Error",
+        description:
+          "Ocurrió un error al registrar la categoría" + error.message,
+        status: "error",
+      });
+    }
+  };
+
+  const deleteCategory = async (id) => {
+    try {
+      const response = await fetch(`/api/categories/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        throw new Error("Ocurrió un error al eliminar la categoría");
+      }
+
+      const updatedCategories = categories.filter((c) => c._id !== id);
+
+      toast({
+        title: "Categoría eliminada",
+        description: "La categoría se ha eliminado correctamente",
+        status: "success",
+      });
+
+      setCategories(updatedCategories);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description:
+          "Ocurrió un error al eliminar la categoría" + error.message,
+        status: "error",
+      });
+    }
+  };
+
+  const addTag = async (data) => {
+    try {
+      const response = await fetch("/api/tags", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        toast({
+          title: "Etiqueta registrada",
+          description: "La etiqueta se ha registrado correctamente",
+          status: "success",
+        });
+        setTags([...tags, data]);
+      } else {
+        toast({
+          title: "Error",
+          description: "Ocurrió un error al registrar la etiqueta",
+          status: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Error al registrar la etiqueta:", error.message);
+      toast({
+        title: "Error",
+        description: "Ocurrió un error al registrar la etiqueta",
+        status: "error",
+      });
+    }
+  };
+
+  const deleteTag = async (id) => {
+    try {
+      const response = await fetch(`/api/tags/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        throw new Error("Ocurrió un error al eliminar la etiqueta");
+      }
+
+      const updatedTags = tags.filter((t) => t._id !== id);
+      toast({
+        title: "Etiqueta eliminada",
+        description: "La etiqueta se ha eliminado correctamente",
+        status: "success",
+      });
+
+      setTags(updatedTags);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Ocurrió un error al eliminar la etiqueta",
+        status: "error",
+      });
+    }
+  };
+
+  const updateSummary = (transactions) => {
+    const summary = transactions.reduce(
+      (acc, transaction) => {
+        if (transaction.type === "ingreso") {
+          acc.ingresos += transaction.amount;
+        } else {
+          acc.egresos += transaction.amount;
+        }
+        return acc;
+      },
+      { ingresos: 0, egresos: 0 },
+    );
+
+    summary.balance = summary.ingresos - summary.egresos;
+    setSummary(summary);
+  };
+
+  const calculatePreviousSummary = (transactions) => {
+    const currentDate = new Date();
+    const lastMonthDate = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() - 1,
+      1,
+    );
+
+    const lastMonthTransactions = transactions.filter(
+      (transaction) => new Date(transaction.date) < lastMonthDate,
+    );
+
+    const previousSummary = lastMonthTransactions.reduce(
+      (acc, transaction) => {
+        if (transaction.type === "ingreso") {
+          acc.ingresos += transaction.amount;
+        } else {
+          acc.egresos += transaction.amount;
+        }
+        return acc;
+      },
+      { ingresos: 0, egresos: 0 },
+    );
+
+    previousSummary.balance =
+      previousSummary.ingresos - previousSummary.egresos;
+    setPreviousSummary(previousSummary);
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const transactionsData = await fetchTransactions();
+        setTransactions(transactionsData);
+        updateSummary(transactionsData);
+        calculatePreviousSummary(transactionsData);
+
+        const categoriesData = await fetchCategories();
+        setCategories(categoriesData);
+
+        const tagsData = await fetchTags();
+        setTags(tagsData);
+      } catch (error) {
+        console.error("Error al obtener las transacciones:", error.message);
+      }
+    };
+    fetchData();
+  }, []);
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Gestión de Ingresos y Egresos</h1>
-      
-      <Tabs defaultValue="transactions" className="mb-6">
-        <TabsList>
+    <div className="container mx-auto space-y-8 p-4">
+      <h1 className="mb-6 text-3xl font-bold">Gestión de Ingresos y Egresos</h1>
+
+      <FinancialSummary
+        setSummaryPeriod={setSummaryPeriod}
+        summary={summary}
+        previousSummary={previousSummary}
+      />
+
+      <Tabs defaultValue="transactions" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="transactions">Transacciones</TabsTrigger>
           <TabsTrigger value="categories">Categorías</TabsTrigger>
           <TabsTrigger value="tags">Etiquetas</TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="transactions">
-          <Card>
-            <CardHeader>
-              <CardTitle>Nueva Transacción</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="type">Tipo</Label>
-                    <Select onValueChange={(value) => setNewTransaction({...newTransaction, type: value})}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar tipo" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="ingreso">Ingreso</SelectItem>
-                        <SelectItem value="egreso">Egreso</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="amount">Monto</Label>
-                    <Input 
-                      type="number" 
-                      value={newTransaction.amount || ''} 
-                      onChange={(e) => setNewTransaction({...newTransaction, amount: parseFloat(e.target.value)})}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="category">Categoría</Label>
-                  <Select onValueChange={(value) => setNewTransaction({...newTransaction, category: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar categoría" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category} value={category}>{category}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="tags">Etiquetas</Label>
-                  <Select 
-                    onValueChange={(value) => setNewTransaction({...newTransaction, tags: [...newTransaction.tags, value]})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar etiquetas" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {tags.map((tag) => (
-                        <SelectItem key={tag} value={tag}>{tag}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {newTransaction.tags.map((tag) => (
-                      <span key={tag} className="bg-primary text-primary-foreground px-2 py-1 rounded-full text-sm">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="description">Descripción</Label>
-                  <Input 
-                    value={newTransaction.description} 
-                    onChange={(e) => setNewTransaction({...newTransaction, description: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="date">Fecha</Label>
-                  <Input 
-                    type="date" 
-                    value={newTransaction.date} 
-                    onChange={(e) => setNewTransaction({...newTransaction, date: e.target.value})}
-                  />
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button onClick={addTransaction}>Agregar Transacción</Button>
-            </CardFooter>
-          </Card>
 
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle>Transacciones</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Monto</TableHead>
-                    <TableHead>Categoría</TableHead>
-                    <TableHead>Etiquetas</TableHead>
-                    <TableHead>Descripción</TableHead>
-                    <TableHead>Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {transactions.map((transaction) => (
-                    <TableRow key={transaction.id}>
-                      <TableCell>{transaction.date}</TableCell>
-                      <TableCell>{transaction.type}</TableCell>
-                      <TableCell>{transaction.amount}</TableCell>
-                      <TableCell>{transaction.category}</TableCell>
-                      <TableCell>{transaction.tags.join(', ')}</TableCell>
-                      <TableCell>{transaction.description}</TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="icon" onClick={() => deleteTransaction(transaction.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+        <TabsContent value="transactions" className="space-y-6">
+          <TransactionForm
+            transaction={selectedTransaction}
+            categories={categories}
+            tags={tags}
+            addTransaction={addTransaction}
+            updateTransaction={updateTransaction}
+          />
+
+          <ListTransactions
+            transactions={transactions}
+            deleteTransaction={deleteTransaction}
+            setSelectedTransaction={setSelectedTransaction} // Pasar la función para seleccionar la transacción a editar
+          />
         </TabsContent>
-        
+
         <TabsContent value="categories">
-          <Card>
-            <CardHeader>
-              <CardTitle>Categorías</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-2 mb-4">
-                <Input 
-                  value={newCategory} 
-                  onChange={(e) => setNewCategory(e.target.value)} 
-                  placeholder="Nueva categoría"
-                />
-                <Button onClick={addCategory}>Agregar</Button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {categories.map((category) => (
-                  <span key={category} className="bg-secondary text-secondary-foreground px-3 py-1 rounded-full">
-                    {category}
-                  </span>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <Categories
+            categories={categories}
+            addCategory={addCategory}
+            deleteCategory={deleteCategory}
+          />
         </TabsContent>
-        
+
         <TabsContent value="tags">
-          <Card>
-            <CardHeader>
-              <CardTitle>Etiquetas</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-2 mb-4">
-                <Input 
-                  value={newTag} 
-                  onChange={(e) => setNewTag(e.target.value)} 
-                  placeholder="Nueva etiqueta"
-                />
-                <Button onClick={addTag}>Agregar</Button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {tags.map((tag) => (
-                  <span key={tag} className="bg-primary text-primary-foreground px-3 py-1 rounded-full">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <Tags tags={tags} addTag={addTag} deleteTag={deleteTag} />
         </TabsContent>
       </Tabs>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Resumen</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex justify-end mb-4">
-            <Select onValueChange={(value) => setSummaryPeriod(value)}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Seleccionar período" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="diario">Diario</SelectItem>
-                <SelectItem value="semanal">Semanal</SelectItem>
-                <SelectItem value="mensual">Mensual</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid grid-cols-3 gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Ingresos</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold text-green-600">${summary.ingresos.toFixed(2)}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Egresos</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold text-red-600">${summary.egresos.toFixed(2)}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Balance</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className={`text-2xl font-bold ${summary.balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  ${summary.balance.toFixed(2)}
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </CardContent>
-      </Card>
     </div>
-  )
+  );
 }

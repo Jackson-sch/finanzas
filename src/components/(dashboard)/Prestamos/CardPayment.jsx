@@ -7,7 +7,7 @@ import {
     CardTitle,
   } from "@/components/ui/card";
 
-export function CardPayment({title, description, children}) {
+export function CardComponent({title, description, children}) {
   return (
     <Card>
       <CardHeader>

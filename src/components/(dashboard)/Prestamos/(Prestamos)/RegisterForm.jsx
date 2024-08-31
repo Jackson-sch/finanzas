@@ -29,7 +29,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { CalendarDaysIcon } from "lucide-react";
-import { CardPayment } from "../CardPayment";
+import { CardComponent } from "../CardPayment";
 import { loanSchema } from "@/lib/validaciones/loan/loan";
 import { toast } from "@/components/ui/use-toast";
 
@@ -47,8 +47,6 @@ export default function RegisterForm({ onSubmit, onSimulator }) {
       paymentFrequency: "",
     },
   });
-
-  const [fechaInicio, setFechaInicio] = useState(null);
 
   const { watch, setValue } = form;
   const interestYear = watch("interestYear");
@@ -96,7 +94,7 @@ export default function RegisterForm({ onSubmit, onSimulator }) {
   }, [durationYear, setValue]);
 
   return (
-    <CardPayment
+    <CardComponent
       title="Registro de Préstamo"
       description="Ingrese los detalles del préstamo que desea registrar."
     >
@@ -181,9 +179,7 @@ export default function RegisterForm({ onSubmit, onSimulator }) {
               name="durationYears"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                  Plazo (años)
-                  </FormLabel>
+                  <FormLabel>Plazo (años)</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -200,9 +196,7 @@ export default function RegisterForm({ onSubmit, onSimulator }) {
               name="durationMonths"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                  Plazo total (meses)
-                  </FormLabel>
+                  <FormLabel>Plazo total (meses)</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -305,6 +299,6 @@ export default function RegisterForm({ onSubmit, onSimulator }) {
           </div>
         </form>
       </Form>
-    </CardPayment>
+    </CardComponent>
   );
 }
