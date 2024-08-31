@@ -1,5 +1,8 @@
+"use client"
+
 import React, { useState, useEffect } from "react";
-import { CardComponent } from "../Prestamos/CardPayment";
+import { addDays, format, isWithinInterval } from "date-fns";
+import { CardComponent } from "../../CardComponent";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Table,
@@ -9,13 +12,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Search } from "lucide-react";
-import { format, parse, isWithinInterval } from "date-fns";
+import { Edit, Trash2, Search, Calendar as CalendarIcon } from "lucide-react";
 import capitalize from "@/utils/capitalize";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DateRange } from "react-day-picker"
+
+import { cn } from "@/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export default function ListTransactions({
   transactions,
@@ -25,8 +32,10 @@ export default function ListTransactions({
   const [filteredTransactions, setFilteredTransactions] = useState(transactions);
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [date, setDate] = useState({
+    from: undefined,
+    to: undefined
+  });
 
   useEffect(() => {
     let result = transactions;
@@ -47,32 +56,33 @@ export default function ListTransactions({
     }
 
     // Date filter
-    if (startDate && endDate) {
-      const start = parse(startDate, "yyyy-MM-dd", new Date());
-      const end = parse(endDate, "yyyy-MM-dd", new Date());
+    if (date?.from && date?.to) {
       result = result.filter((transaction) =>
-        isWithinInterval(new Date(transaction.date), { start, end })
+        isWithinInterval(new Date(transaction.date), { start: date.from, end: date.to })
       );
     }
 
     setFilteredTransactions(result);
-  }, [transactions, searchTerm, typeFilter, startDate, endDate]);
+  }, [transactions, searchTerm, typeFilter, date]);
 
   return (
     <CardComponent
       title="Listado de transacciones"
       description="Listado de transacciones"
     >
-      <div className="mb-4 space-y-2">
-        <div className="flex items-center space-x-2">
-          <Search className="h-4 w-4 text-gray-400" />
+      <div className="grid grid-cols-2 gap-2 items-center justify-between mb-6">
+        <div>
+          <div className="relative ml-auto flex-1 md:grow-0">
+          <Search className="absolute left-2.5 top-3 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar por descripción, categoría o etiquetas"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-sm"
+            className="max-w-sm pl-8 bg-background"
           />
         </div>
+        </div>
+        
         <div className="flex items-center space-x-2">
           <Select value={typeFilter} onValueChange={setTypeFilter}>
             <SelectTrigger className="w-[180px]">
@@ -84,18 +94,44 @@ export default function ListTransactions({
               <SelectItem value="egreso">Egreso</SelectItem>
             </SelectContent>
           </Select>
-          <Input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="max-w-[150px]"
-          />
-          <Input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            className="max-w-[150px]"
-          />
+          <div className="grid gap-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  id="date"
+                  variant={"outline"}
+                  className={cn(
+                    "w-[300px] justify-start text-left font-normal",
+                    !date && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {date?.from ? (
+                    date.to ? (
+                      <>
+                        {format(date.from, "LLL dd, y")} -{" "}
+                        {format(date.to, "LLL dd, y")}
+                      </>
+                    ) : (
+                      format(date.from, "LLL dd, y")
+                    )
+                  ) : (
+                    <span>Selecciona un rango de fechas</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  initialFocus
+                  mode="range"
+                  defaultMonth={date?.from}
+                  selected={date}
+                  onSelect={setDate}
+                  numberOfMonths={2}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
       </div>
       <ScrollArea className="h-[400px]">

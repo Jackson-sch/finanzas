@@ -12,7 +12,6 @@ import FinancialSummary from "./FinancialSummary";
 import ListTransactions from "./ListTransactions";
 import Categories from "./Categories";
 import Tags from "./Tags";
-import { set } from "mongoose";
 
 export default function TransactionV2() {
   const [transactions, setTransactions] = useState([]);
@@ -277,20 +276,55 @@ export default function TransactionV2() {
     summary.balance = summary.ingresos - summary.egresos;
     setSummary(summary);
   };
+  // Función para obtener datos en función del período
+  const fetchDataForPeriod = async (period) => {
+    let filteredTransactions = transactions;
+    
+    // Filtrar transacciones según el período seleccionado
+    switch (period) {
+      case "diario":
+        filteredTransactions = transactions.filter((transaction) => {
+          // Lógica para filtrar las transacciones del día actual
+          const today = new Date();
+          const transactionDate = new Date(transaction.date);
+          return transactionDate.toDateString() === today.toDateString();
+        });
+        break;
+      case "semanal":
+        filteredTransactions = transactions.filter((transaction) => {
+          // Lógica para filtrar las transacciones de la semana actual
+          const today = new Date();
+          const transactionDate = new Date(transaction.date);
+          const oneWeekAgo = new Date(today);
+          oneWeekAgo.setDate(today.getDate() - 7);
+          return transactionDate >= oneWeekAgo && transactionDate <= today;
+        });
+        break;
+      case "mensual":
+        filteredTransactions = transactions.filter((transaction) => {
+          // Lógica para filtrar las transacciones del mes actual
+          const today = new Date();
+          const transactionDate = new Date(transaction.date);
+          return (
+            transactionDate.getMonth() === today.getMonth() &&
+            transactionDate.getFullYear() === today.getFullYear()
+          );
+        });
+        break;
+      case "anual":
+        filteredTransactions = transactions.filter((transaction) => {
+          // Lógica para filtrar las transacciones del año actual
+          const today = new Date();
+          const transactionDate = new Date(transaction.date);
+          return transactionDate.getFullYear() === today.getFullYear();
+        });
+        break;
+      default:
+        break;
+    }
 
-  const calculatePreviousSummary = (transactions) => {
-    const currentDate = new Date();
-    const lastMonthDate = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth() - 1,
-      1,
-    );
-
-    const lastMonthTransactions = transactions.filter(
-      (transaction) => new Date(transaction.date) < lastMonthDate,
-    );
-
-    const previousSummary = lastMonthTransactions.reduce(
+    // Calcular los resúmenes para el período actual
+    const currentSummary = filteredTransactions.reduce(
       (acc, transaction) => {
         if (transaction.type === "ingreso") {
           acc.ingresos += transaction.amount;
@@ -299,13 +333,84 @@ export default function TransactionV2() {
         }
         return acc;
       },
-      { ingresos: 0, egresos: 0 },
+      { ingresos: 0, egresos: 0 }
+    );
+    currentSummary.balance = currentSummary.ingresos - currentSummary.egresos;
+    setSummary(currentSummary);
+
+    // Calcular los resúmenes para el período anterior
+    // Aquí puedes adaptar la lógica para calcular el resumen del período anterior según el tipo de período seleccionado
+    const previousSummary = calculatePreviousSummary(transactions, period);
+    setPreviousSummary(previousSummary);
+  };
+
+  const calculatePreviousSummary = (transactions, period) => {
+    const currentDate = new Date();
+    let lastPeriodDate;
+
+    // Lógica para determinar la fecha de inicio del período anterior según el tipo de período seleccionado
+    switch (period) {
+      case "diario":
+        lastPeriodDate = new Date(currentDate);
+        lastPeriodDate.setDate(currentDate.getDate() - 1);
+        break;
+      case "semanal":
+        lastPeriodDate = new Date(currentDate);
+        lastPeriodDate.setDate(currentDate.getDate() - 7);
+        break;
+      case "mensual":
+        lastPeriodDate = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth() - 1,
+          1
+        );
+        break;
+      case "anual":
+        lastPeriodDate = new Date(currentDate.getFullYear() - 1, 0, 1);
+        break;
+      default:
+        lastPeriodDate = new Date(currentDate);
+    }
+
+    const lastPeriodTransactions = transactions.filter(
+      (transaction) => new Date(transaction.date) < lastPeriodDate
+    );
+
+    const previousSummary = lastPeriodTransactions.reduce(
+      (acc, transaction) => {
+        if (transaction.type === "ingreso") {
+          acc.ingresos += transaction.amount;
+        } else {
+          acc.egresos += transaction.amount;
+        }
+        return acc;
+      },
+      { ingresos: 0, egresos: 0 }
     );
 
     previousSummary.balance =
       previousSummary.ingresos - previousSummary.egresos;
-    setPreviousSummary(previousSummary);
+    return previousSummary;
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const transactionsData = await fetchTransactions();
+        setTransactions(transactionsData);
+        fetchDataForPeriod(summaryPeriod); // Inicializar datos con el período seleccionado
+
+        const categoriesData = await fetchCategories();
+        setCategories(categoriesData);
+
+        const tagsData = await fetchTags();
+        setTags(tagsData);
+      } catch (error) {
+        console.error("Error al obtener las transacciones:", error.message);
+      }
+    };
+    fetchData();
+  }, [summaryPeriod]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -335,6 +440,7 @@ export default function TransactionV2() {
         setSummaryPeriod={setSummaryPeriod}
         summary={summary}
         previousSummary={previousSummary}
+        fetchDataForPeriod={fetchDataForPeriod}
       />
 
       <Tabs defaultValue="transactions" className="space-y-6">

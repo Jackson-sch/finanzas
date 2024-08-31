@@ -11,7 +11,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import { CardComponent } from "../Prestamos/CardPayment";
+import { CardComponent } from "../../CardComponent";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tag } from "lucide-react";

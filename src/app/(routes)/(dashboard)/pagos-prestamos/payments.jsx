@@ -57,12 +57,37 @@ export default function Payments() {
       });
     }
   };
+
+  const deletePayment = async (id) => {
+    try {
+      const response = await fetch(`/api/payments/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        throw new Error("Ocurrió un error al eliminar el pago");
+      }
+      const updatedPayments = loans.filter((p) => p._id !== id);
+      toast({
+        title: "Pago eliminado",
+        description: "El pago se ha eliminado correctamente",
+        status: "success",
+      });
+      setLoans(updatedPayments);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Ocurrió un error al eliminar el pago",
+        status: "error",
+      });
+    }
+  };
+
   return (
     <div className="flex h-screen flex-col">
       <header className="flex items-center justify-between rounded-md bg-primary px-6 py-4 text-primary-foreground">
         <h1 className="text-2xl font-bold">Gestión pagos de préstamos</h1>
       </header>
-      <main className="flex flex-col pt-6 gap-4">
+      <main className="flex flex-col gap-4 pt-6">
         <div>
           <PaymentsLoad
             loans={loans}
@@ -71,7 +96,11 @@ export default function Payments() {
           />
         </div>
         <div>
-          <PaymentHistory payments={payments} loans={loans} />
+          <PaymentHistory
+            payments={payments}
+            loans={loans}
+            deletePayment={deletePayment}
+          />
         </div>
       </main>
     </div>

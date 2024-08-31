@@ -1,5 +1,5 @@
-import React from "react";
-import { CardComponent } from "../Prestamos/CardPayment";
+import React, { useState } from "react";
+import { CardComponent } from "../../CardComponent";
 import {
   Select,
   SelectContent,
@@ -7,10 +7,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { CalendarIcon } from "lucide-react"; // Import CalendarIcon for better UI
 
-const calculatePercentageChange = (current, previos) => {
-  if (previos === 0) return current > 0 ? 100 : 0;
-  return ((current - previos) / previos) * 100;
+const calculatePercentageChange = (current, previous) => {
+  if (previous === 0) return current > 0 ? 100 : 0;
+  return ((current - previous) / previous) * 100;
 };
 
 const PercentageIndicator = ({ value }) => {
@@ -29,18 +30,27 @@ export default function FinancialSummary({
   summary,
   setSummaryPeriod,
   previousSummary,
+  fetchDataForPeriod
 }) {
+  const [localPeriod, setLocalPeriod] = useState("mensual");
+
+  const handleChange = (value) => {
+    setLocalPeriod(value);
+    setSummaryPeriod(value); // Actualizar el período en el componente padre
+    fetchDataForPeriod(value); // Llamar a la función para actualizar datos
+  };
+
   const ingresosChange = calculatePercentageChange(
     summary.ingresos,
-    previousSummary.ingresos,
+    previousSummary.ingresos
   );
   const egresosChange = calculatePercentageChange(
     summary.egresos,
-    previousSummary.egresos,
+    previousSummary.egresos
   );
   const balanceChange = calculatePercentageChange(
     summary.balance,
-    previousSummary.balance,
+    previousSummary.balance
   );
 
   return (
@@ -48,40 +58,50 @@ export default function FinancialSummary({
       title="Resumen financiero"
       description="Resumen rápido de los ingresos y egresos"
     >
-      <div className="mb-6 flex justify-end">
-        <Select onValueChange={(value) => setSummaryPeriod(value)}>
+      <div className="mb-6 flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Período actual</h2>
+        <Select onValueChange={(value) => handleChange(value)}>
           <SelectTrigger className="w-[180px]">
+            <CalendarIcon className="mr-2 h-4 w-4" />
             <SelectValue placeholder="Seleccionar período" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="diario">Diario</SelectItem>
             <SelectItem value="semanal">Semanal</SelectItem>
             <SelectItem value="mensual">Mensual</SelectItem>
+            <SelectItem value="anual">Anual</SelectItem>
           </SelectContent>
         </Select>
       </div>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <CardComponent title="Ingresos" description="Ingresos">
-          <p className="text-3xl font-bold text-green-600">
-            S/ {summary.ingresos.toFixed(2)}
-          </p>
-          <PercentageIndicator value={ingresosChange} />
-        </CardComponent>
-        <CardComponent title="Egresos" description="Egresos">
-          <p className="text-3xl font-bold text-red-600">
-            S/ {summary.egresos.toFixed(2)}
-          </p>
-          <PercentageIndicator value={egresosChange} />
-        </CardComponent>
-        <CardComponent title="Balance" description="Balance">
-          <p
-            className={`text-3xl font-bold ${summary.balance >= 0 ? "text-green-600" : "text-red-600"}`}
-          >
-            S/ {summary.balance.toFixed(2)}
-          </p>
-          <PercentageIndicator value={balanceChange} />
-        </CardComponent>
+        <SummaryCard
+          title="Ingresos"
+          amount={summary.ingresos}
+          change={ingresosChange}
+          color="green"
+        />
+        <SummaryCard
+          title="Egresos"
+          amount={summary.egresos}
+          change={egresosChange}
+          color="red"
+        />
+        <SummaryCard
+          title="Balance"
+          amount={summary.balance}
+          change={balanceChange}
+          color={summary.balance >= 0 ? "green" : "red"}
+        />
       </div>
     </CardComponent>
   );
 }
+
+const SummaryCard = ({ title, amount, change, color }) => (
+  <CardComponent title={title} description={title}>
+    <p className={`text-3xl font-bold text-${color}-600`}>
+      S/ {amount.toFixed(2)}
+    </p>
+    <PercentageIndicator value={change} />
+  </CardComponent>
+);

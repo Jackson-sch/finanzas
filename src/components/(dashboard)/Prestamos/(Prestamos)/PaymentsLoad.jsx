@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { User, CreditCard } from "lucide-react"
+import { User, CreditCard, PlusCircleIcon } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import {
@@ -65,11 +65,21 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
     const loan = loans.find((loan) => loan._id === loanId);
     setSelectedLoan(loan);
 
-    // Actualizar el campo amount con el monto de la cuota mensual del préstamo seleccionado
     if (loan) {
       const loanData = calculateSimulatorData(loan);
       form.setValue("amount", loanData.paymentAmount);
+
+      // Calcular el siguiente número de cuota automáticamente
+      const nextPaymentNumber = getNextPaymentNumber(loanId);
+      form.setValue("paymentNumber", nextPaymentNumber);
     }
+  };
+
+  const getNextPaymentNumber = (loanId) => {
+    const existingPayments = payments.filter(
+      (payment) => payment.loanId === loanId
+    );
+    return existingPayments.length + 1; // Siguiente número de cuota es el total de pagos + 1
   };
 
   const validatePaymentNumber = (paymentNumber) => {
@@ -77,7 +87,7 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
       const existingPayment = payments.find(
         (payment) =>
           payment.loanId === selectedLoan._id &&
-          payment.paymentNumber === parseInt(paymentNumber, 10),
+          payment.paymentNumber === parseInt(paymentNumber, 10)
       );
 
       if (existingPayment) {
@@ -94,7 +104,6 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
 
   const handleSubmit = (data) => {
     if (validatePaymentNumber(data.paymentNumber)) {
-      // Asegurarse de que la fecha esté en formato ISO
       if (data.date) {
         data.date = new Date(data.date).toISOString();
       }
@@ -106,20 +115,31 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
   };
 
   useEffect(() => {
-    // Filtrar los préstamos que aún tienen saldo pendiente
     const loansWithPendingBalance = loans.filter((loan) => {
       const loanData = calculateSimulatorData(loan);
-      // Convertimos remainingAmount a número antes de compararlo
       const remainingAmount = parseFloat(loanData.remainingAmount);
-      return remainingAmount > 0;
+
+      // Obtener el número de pagos realizados
+      const paymentsMade = payments.filter(
+        (payment) => payment.loanId === loan._id
+      ).length;
+
+      // Filtrar préstamos con saldo pendiente mayor a 0 y pagos incompletos
+      return (
+        remainingAmount > 0 &&
+        paymentsMade < loanData.totalPayments // Suponiendo que loanData.totalPayments es el número total de cuotas del préstamo
+      );
     });
 
     setFilteredLoans(loansWithPendingBalance);
-  }, [loans]);
+  }, [loans, payments]); // Agregamos 'payments' como dependencia para actualizar la lista si cambian los pagos.
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'PEN' }).format(amount)
-  }
+    return new Intl.NumberFormat("es-ES", {
+      style: "currency",
+      currency: "PEN",
+    }).format(amount);
+  };
 
   return (
     <Card>
@@ -211,7 +231,7 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
                           value={field.value}
                           onChange={(e) => {
                             field.onChange(Number(e.target.value));
-                          }} // Convertir a número
+                          }}
                           readOnly
                         />
                       </FormControl>
@@ -234,7 +254,7 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
                           {...field}
                           onChange={(e) => {
                             field.onChange(Number(e.target.value));
-                          }} // Convertir a número
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
@@ -277,9 +297,8 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
                               field.onChange(date?.toISOString())
                             }
                             disabled={(date) =>
-                              date > new Date() || date < new Date("1900-01-01")
+                              date > new Date() // Desactivar fechas futuras
                             }
-                            initialFocus
                           />
                         </PopoverContent>
                       </Popover>
@@ -289,9 +308,13 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
                 />
               </div>
             </div>
-            <div className="mt-4 flex justify-end">
-              <Button type="submit">Pago de préstamo</Button>
+            <div className="flex justify-end">
+              <Button type="submit" className="mt-4">
+              <PlusCircleIcon className="mr-2 h-4 w-4" />
+              Registrar pago
+            </Button>
             </div>
+            
           </form>
         </Form>
       </CardContent>

@@ -29,7 +29,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { CalendarDaysIcon } from "lucide-react";
-import { CardComponent } from "../CardPayment";
+import { CardComponent } from "../../../CardComponent";
 import { loanSchema } from "@/lib/validaciones/loan/loan";
 import { toast } from "@/components/ui/use-toast";
 

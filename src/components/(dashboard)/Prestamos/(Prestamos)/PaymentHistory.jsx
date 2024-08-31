@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -18,9 +19,10 @@ import { useToast } from "@/components/ui/use-toast";
 import capitalize from "@/utils/capitalize";
 import { formatDate } from "@/utils/formattedDate";
 import { calculateSimulatorData } from "@/utils/loanSimulator/LoanSimulator";
+import { TrashIcon } from "lucide-react";
 import { useEffect } from "react";
 
-export default function PaymentHistory({ payments, loans }) {
+export default function PaymentHistory({ payments, loans, deletePayment }) {
 
   const { toast } = useToast();
 
@@ -63,6 +65,7 @@ export default function PaymentHistory({ payments, loans }) {
               <TableHead>Restante</TableHead>
               <TableHead>Total</TableHead>
               <TableHead>Progreso</TableHead>
+              <TableHead>Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -109,6 +112,12 @@ export default function PaymentHistory({ payments, loans }) {
                         {progress}% {/* O puedes poner `S/ {loanData.remainingAmount}` */}
                       </div>
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    <Button variant="ghost"
+                    size="icon" onClick={() => deletePayment(payment._id)}>
+                      <TrashIcon className="h-4 w-4" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               );

@@ -72,39 +72,7 @@ export default function Prestamos() {
     }
   };
 
-  const handleSubmitPayment = async (data) => {
-    try {
-      // Maneja la creación de nuevos pagos
-      const response = await fetch("/api/payments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-      if (response.ok) {
-        toast({
-          title: "Pago registrado",
-          description: "El pago ha sido registrado exitosamente",
-          status: "success",
-        });
-        setLoans([...loans, data]);
-      } else {
-        toast({
-          title: "Error",
-          description: "Ocurrió un error al registrar el pago",
-          status: "error",
-        });
-      }
-    } catch (error) {
-      console.error("Error al registrar el pago:", error.message);
-      toast({
-        title: "Error",
-        description: "Ocurrió un error al registrar el pago",
-        status: "error",
-      });
-    }
-  };
+
 
   return (
     <div className="flex h-screen flex-col">
@@ -117,20 +85,11 @@ export default function Prestamos() {
           <DetailsLoan simulatorData={simulatorData} />
         </div>
         <Separator className="my-6" />
-        {/* <div>
-          <PaymentsLoad
-            loans={loans}
-            handleSubmitPayment={handleSubmitPayment}
-          />
-        </div> 
-        <Separator className="my-6" />*/}
+        
         <div className="mb-5">
           <ListLoans loans={loans} />
         </div>
         <Separator className="my-6" />
-        {/* <div className="mb-5">
-          <PaymentHistory loans={loans} />
-        </div> */}
       </main>
     </div>
   );

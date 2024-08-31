@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 
-import { CardComponent } from "../Prestamos/CardPayment";
+import { CardComponent } from "../../CardComponent";
 import { Button } from "@/components/ui/button";
 import { CalendarDaysIcon, PlusCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
