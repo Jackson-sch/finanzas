@@ -1,4 +1,5 @@
 import { CardComponent } from "@/components/CardComponent";
+import { currencyFormatter } from "@/components/CurrencyFormatter";
 import React from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
@@ -36,9 +37,25 @@ export default function ExpenseCategoryChart({ transactions, COLORS }) {
     <CardComponent
       title="Gastos por Categoría"
       description="Distribución de gastos por categoría"
+      className="shadow-lg"
     >
       <ResponsiveContainer width="100%" height={200}>
         <PieChart>
+          <defs>
+            {dataForChart.map((entry, index) => (
+              <linearGradient
+                key={`gradient-${index}`}
+                id={`color-${index}`}
+                x1="0"
+                y1="0"
+                x2="1"
+                y2="1"
+              >
+                <stop offset="5%" stopColor={COLORS[index % COLORS.length]} stopOpacity={0.8} />
+                <stop offset="95%" stopColor={COLORS[(index + 1) % COLORS.length]} stopOpacity={0.5} />
+              </linearGradient>
+            ))}
+          </defs>
           <Pie
             data={dataForChart}
             cx="50%"
@@ -52,11 +69,11 @@ export default function ExpenseCategoryChart({ transactions, COLORS }) {
             {dataForChart.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}
-                fill={COLORS[index % COLORS.length]}
+                fill={`url(#color-${index})`}
               />
             ))}
           </Pie>
-          <Tooltip />
+          <Tooltip formatter={(value) => currencyFormatter.format(value)} />
         </PieChart>
       </ResponsiveContainer>
       

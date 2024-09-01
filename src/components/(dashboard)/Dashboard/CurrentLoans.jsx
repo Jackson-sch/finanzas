@@ -1,4 +1,5 @@
 import { CardComponent } from "@/components/CardComponent";
+import { currencyFormatter } from "@/components/CurrencyFormatter";
 import { format, addMonths, isBefore } from "date-fns";
 
 export default function CurrentLoans({ loans }) {
@@ -10,6 +11,7 @@ export default function CurrentLoans({ loans }) {
       <CardComponent
         title="Préstamos Actuales"
         description="Información sobre los préstamos actuales"
+        className="shadow-lg"
       >
         <div className="space-y-6">
           {loans.map((loan) => {
@@ -35,7 +37,7 @@ export default function CurrentLoans({ loans }) {
                 </div>
                 <div className="text-right">
                   <div className="font-medium text-gray-800">
-                    S/ {loan.amount}
+                    S/ {currencyFormatter.format(loan.amount)}
                   </div>
                   <div
                     className={`text-xs ${

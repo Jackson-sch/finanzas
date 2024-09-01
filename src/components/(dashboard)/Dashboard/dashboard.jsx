@@ -1,17 +1,23 @@
 
+'use client'
 import React from 'react'
-import { 
-  BarChart2, 
-  PieChart, 
-  TrendingUp, 
-  Wallet, 
-  Target, 
-  CreditCard, 
-  AlertTriangle,
-  LineChart
-} from 'react-feather'
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
+import { AlertTriangle, BarChart2, CreditCard, Target, TrendingUp, Wallet } from 'lucide-react';
 
 export default function FinanceDashboard() {
   return (

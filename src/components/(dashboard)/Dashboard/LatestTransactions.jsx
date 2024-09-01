@@ -27,6 +27,7 @@ export default function LatestTransactions({ transactions }) {
     <CardComponent
       title="Transacciones Recientes"
       description="Has realizado estas transacciones durante los últimos 30 días"
+      className="shadow-lg"
     >
       <ScrollArea className="h-[385px]">
         <div className="space-y-6">

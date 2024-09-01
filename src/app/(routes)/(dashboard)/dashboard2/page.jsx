@@ -16,6 +16,7 @@ import {
   LineChartIcon,
   TrendingUpIcon,
   TrendingDownIcon,
+  AlertTriangle,
 } from "lucide-react";
 import {
   BarChart,
@@ -37,17 +38,8 @@ import LatestTransactions from "@/components/(dashboard)/Dashboard/LatestTransac
 import ExpenseCategoryChart from "@/components/(dashboard)/Dashboard/ExpenseCategoryChart";
 import { COLORS } from "@/components/Colors";
 import SpendingTrendChart from "@/components/(dashboard)/Dashboard/SpendingTrendChart";
-
-const data = [
-  { name: "Ene", ingresos: 4000, egresos: 2400 },
-  { name: "Feb", ingresos: 3000, egresos: 1398 },
-  { name: "Mar", ingresos: 2000, egresos: 9800 },
-  { name: "Abr", ingresos: 2780, egresos: 3908 },
-  { name: "May", ingresos: 1890, egresos: 4800 },
-  { name: "Jun", ingresos: 2390, egresos: 3800 },
-];
-
-
+import IncomeAndExpenseChart from "@/components/(dashboard)/Dashboard/IncomeAndExpenseChart";
+import FinanceDashboard from "@/components/(dashboard)/Dashboard/dashboard";
 
 export default function DashboardPage() {
   const [loans, setLoans] = useState([]);
@@ -155,55 +147,15 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <Card className="col-span-4 bg-white shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-xl font-bold text-gray-800 dark:text-white">
-                Ingresos vs Egresos
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pl-2">
-              <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={data}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="ingresos" fill="#10B981" />
-                  <Bar dataKey="egresos" fill="#EF4444" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+          <div className="col-span-4">
+            <IncomeAndExpenseChart transactions={transactions} />
+          </div>
           <div className="col-span-3">
             <CurrentLoans loans={loans} />
           </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          {/* <Card className="col-span-4 bg-white shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-xl font-bold text-gray-800 dark:text-white">
-                Tendencia de Gastos
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pl-2">
-              <ResponsiveContainer width="100%" height={350}>
-                <LineChart data={data}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line
-                    type="monotone"
-                    dataKey="egresos"
-                    stroke="#EF4444"
-                    fill="#8884d8"
-                    strokeWidth={2}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card> */}
           <div className="col-span-4">
             <SpendingTrendChart transactions={transactions} />
           </div>
@@ -214,6 +166,8 @@ export default function DashboardPage() {
         </div>
 
         <LatestTransactions transactions={transactions} />
+
+        <FinanceDashboard />
       </div>
     </div>
   );
