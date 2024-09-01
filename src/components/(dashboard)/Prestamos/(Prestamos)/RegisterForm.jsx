@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+/* El código anterior es un componente funcional React llamado `RegisterForm` que representa un formulario para
+registrar un préstamo.Aquí hay un desglose de lo que está haciendo el código: */
+import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { format, parseISO } from "date-fns";

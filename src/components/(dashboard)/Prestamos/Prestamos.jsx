@@ -1,9 +1,16 @@
-import { useCallback, useEffect, useState } from "react";
+/**
+ * El componente de la función 'Prestamos' gestiona el registro de préstamos, la simulación y la visualización dentro de un préstamo
+* Sistema de gestión en una aplicación React.
+* @returns El componente `prestamos` se está devueltos.Es un componente funcional que gestiona el préstamo
+* Datos e incluye un formulario para registrar nuevos préstamos, un simulador de préstamos y una lista de préstamos existentes.
+* El componente obtiene datos de préstamos sobre el montaje utilizando `UseEffect` y maneja el registro de préstamos y
+* Cálculos del simulador a través de varias funciones.La estructura del componente incluye un encabezado para préstamo
+* Gestión, una sección principal con un formulario
+ */
+import { useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import RegisterForm from "./(Prestamos)/RegisterForm";
 import DetailsLoan from "./(Prestamos)/DetailsLoan";
-import PaymentsLoad from "./(Prestamos)/PaymentsLoad";
-import PaymentHistory from "./(Prestamos)/PaymentHistory";
 import { fetchLoans } from "@/utils/fetchingData";
 import { calculateSimulatorData } from "@/utils/loanSimulator/LoanSimulator";
 import { useToast } from "@/components/ui/use-toast";
@@ -72,8 +79,6 @@ export default function Prestamos() {
     }
   };
 
-
-
   return (
     <div className="flex h-screen flex-col">
       <header className="flex items-center justify-between rounded-md bg-primary px-6 py-4 text-primary-foreground">
@@ -85,7 +90,7 @@ export default function Prestamos() {
           <DetailsLoan simulatorData={simulatorData} />
         </div>
         <Separator className="my-6" />
-        
+
         <div className="mb-5">
           <ListLoans loans={loans} />
         </div>

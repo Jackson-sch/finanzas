@@ -77,5 +77,18 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  corePlugins: {
+    ringWidth: false, // Desactiva el plugin de ringWidth
+  },
+  plugins: [
+    require("tailwindcss-animate"),
+    function({addBase}) {
+      addBase({
+        'input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible': {
+          outline: 'none',
+          boxShadow: 'none',
+        },
+      })
+    }
+  ],
 }

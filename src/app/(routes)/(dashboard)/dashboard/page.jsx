@@ -1,15 +1,7 @@
 import { auth } from "@/auth";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import DashboardPage from "../dashboard2/page";
 
-export default async function DashboardPage() {
+export default async function Dashboard() {
   const session = await auth();
 
   if (!session) {
@@ -19,94 +11,7 @@ export default async function DashboardPage() {
   return (
     <div className="flex min-h-screen">
       <div className="flex-1 ">
-        <pre>{JSON.stringify(session, null, 2)}</pre>
-        <div className="grid gap-6 p-6">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-md font-semibold">
-                  Total Users
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">$45,567.45</p>
-                <p className="text-sm font-normal text-muted-foreground">
-                  +23.45% from last month
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-md font-semibold">
-                  Total Users
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">$45,567.45</p>
-                <p className="text-sm font-normal text-muted-foreground">
-                  +23.45% from last month
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-md font-semibold">
-                  Total Users
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">$45,567.45</p>
-                <p className="text-sm font-normal text-muted-foreground">
-                  +23.45% from last month
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-md font-semibold">
-                  Total Users
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">$45,567.45</p>
-                <p className="text-sm font-normal text-muted-foreground">
-                  +23.45% from last month
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-          <div className="grid gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-md font-semibold">
-                  Recent Signups
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Plan</TableHead>
-                      <TableHead>Date</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {users.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell>{user.name}</TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>{user.plan}</TableCell>
-                        <TableCell>{user.date}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+        <DashboardPage />
       </div>
     </div>
   );

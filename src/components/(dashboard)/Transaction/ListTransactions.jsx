@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useState, useEffect } from "react";
 import { addDays, format, isWithinInterval } from "date-fns";
@@ -18,23 +18,35 @@ import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Search, Calendar as CalendarIcon } from "lucide-react";
 import capitalize from "@/utils/capitalize";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DateRange } from "react-day-picker"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { DateRange } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import InputSearch from "@/components/InputSearch";
 
 export default function ListTransactions({
   transactions,
   deleteTransaction,
   setSelectedTransaction,
 }) {
-  const [filteredTransactions, setFilteredTransactions] = useState(transactions);
+  const [filteredTransactions, setFilteredTransactions] =
+    useState(transactions);
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [date, setDate] = useState({
     from: undefined,
-    to: undefined
+    to: undefined,
   });
 
   useEffect(() => {
@@ -44,9 +56,15 @@ export default function ListTransactions({
     if (searchTerm) {
       result = result.filter(
         (transaction) =>
-          transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          transaction.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          transaction.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+          transaction.description
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          transaction.category
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          transaction.tags.some((tag) =>
+            tag.toLowerCase().includes(searchTerm.toLowerCase()),
+          ),
       );
     }
 
@@ -58,7 +76,10 @@ export default function ListTransactions({
     // Date filter
     if (date?.from && date?.to) {
       result = result.filter((transaction) =>
-        isWithinInterval(new Date(transaction.date), { start: date.from, end: date.to })
+        isWithinInterval(new Date(transaction.date), {
+          start: date.from,
+          end: date.to,
+        }),
       );
     }
 
@@ -70,67 +91,64 @@ export default function ListTransactions({
       title="Listado de transacciones"
       description="Listado de transacciones"
     >
-      <div className="grid grid-cols-2 gap-2 items-center justify-between mb-6">
-        <div>
-          <div className="relative ml-auto flex-1 md:grow-0">
-          <Search className="absolute left-2.5 top-3 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por descripción, categoría o etiquetas"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-sm pl-8 bg-background"
-          />
-        </div>
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filtrar por tipo" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos</SelectItem>
-              <SelectItem value="ingreso">Ingreso</SelectItem>
-              <SelectItem value="egreso">Egreso</SelectItem>
-            </SelectContent>
-          </Select>
-          <div className="grid gap-2">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  id="date"
-                  variant={"outline"}
-                  className={cn(
-                    "w-[300px] justify-start text-left font-normal",
-                    !date && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date?.from ? (
-                    date.to ? (
-                      <>
-                        {format(date.from, "LLL dd, y")} -{" "}
-                        {format(date.to, "LLL dd, y")}
-                      </>
+      <div className="mb-6 grid gap-6">
+        <div className="flex items-center justify-between gap-4">
+          <div className="max-w-sm flex-1">
+            <InputSearch
+              setSearchTerm={setSearchTerm}
+              searchTerm={searchTerm}
+              placeholder="Buscar por descripción, categoría o etiqueta"
+            />
+          </div>
+          <div className="flex items-center gap-4">
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Filtrar por tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="ingreso">Ingreso</SelectItem>
+                <SelectItem value="egreso">Egreso</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="grid gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    id="date"
+                    variant={"outline"}
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !date && "text-muted-foreground",
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {date?.from ? (
+                      date.to ? (
+                        <>
+                          {format(date.from, "LLL dd, y")} -{" "}
+                          {format(date.to, "LLL dd, y")}
+                        </>
+                      ) : (
+                        format(date.from, "LLL dd, y")
+                      )
                     ) : (
-                      format(date.from, "LLL dd, y")
-                    )
-                  ) : (
-                    <span>Selecciona un rango de fechas</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  initialFocus
-                  mode="range"
-                  defaultMonth={date?.from}
-                  selected={date}
-                  onSelect={setDate}
-                  numberOfMonths={2}
-                />
-              </PopoverContent>
-            </Popover>
+                      <span>Selecciona un rango de fechas</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    initialFocus
+                    mode="range"
+                    defaultMonth={date?.from}
+                    selected={date}
+                    onSelect={setDate}
+                    numberOfMonths={2}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
         </div>
       </div>
