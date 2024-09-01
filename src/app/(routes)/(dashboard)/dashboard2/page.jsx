@@ -31,8 +31,12 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { fetchLoans } from "@/utils/fetchingData";
+import { fetchLoans, fetchTransactions } from "@/utils/fetchingData";
 import CurrentLoans from "@/components/(dashboard)/Dashboard/CurrentLoans";
+import LatestTransactions from "@/components/(dashboard)/Dashboard/LatestTransactions";
+import ExpenseCategoryChart from "@/components/(dashboard)/Dashboard/ExpenseCategoryChart";
+import { COLORS } from "@/components/Colors";
+import SpendingTrendChart from "@/components/(dashboard)/Dashboard/SpendingTrendChart";
 
 const data = [
   { name: "Ene", ingresos: 4000, egresos: 2400 },
@@ -43,76 +47,20 @@ const data = [
   { name: "Jun", ingresos: 2390, egresos: 3800 },
 ];
 
-const prestamos = [
-  {
-    nombre: "Carlos Pérez",
-    monto: 1000,
-    fechaPago: "2023-08-15",
-    estado: "Al día",
-  },
-  {
-    nombre: "María González",
-    monto: 500,
-    fechaPago: "2023-07-30",
-    estado: "Atrasado",
-  },
-  {
-    nombre: "Juan Rodríguez",
-    monto: 2000,
-    fechaPago: "2023-09-01",
-    estado: "Al día",
-  },
-];
 
-const transacciones = [
-  {
-    tipo: "ingreso",
-    descripcion: "Salario",
-    monto: 3000,
-    fecha: "2023-06-01",
-    categoria: "Trabajo",
-  },
-  {
-    tipo: "egreso",
-    descripcion: "Alquiler",
-    monto: 800,
-    fecha: "2023-06-02",
-    categoria: "Vivienda",
-  },
-  {
-    tipo: "egreso",
-    descripcion: "Supermercado",
-    monto: 150,
-    fecha: "2023-06-03",
-    categoria: "Alimentación",
-  },
-  {
-    tipo: "ingreso",
-    descripcion: "Freelance",
-    monto: 500,
-    fecha: "2023-06-04",
-    categoria: "Trabajo",
-  },
-];
-
-const gastosPorCategoria = [
-  { name: "Vivienda", value: 800 },
-  { name: "Alimentación", value: 150 },
-  { name: "Transporte", value: 200 },
-  { name: "Entretenimiento", value: 100 },
-];
-
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
 export default function DashboardPage() {
   const [loans, setLoans] = useState([]);
-  console.log("🚀 ~ DashboardPage ~ loans:", loans);
+  const [transactions, setTransactions] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const loansData = await fetchLoans();
         setLoans(loansData);
+
+        const transactionsData = await fetchTransactions();
+        setTransactions(transactionsData);
       } catch (error) {
         console.error(error);
       }
@@ -232,7 +180,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <Card className="col-span-4 bg-white shadow-lg">
+          {/* <Card className="col-span-4 bg-white shadow-lg">
             <CardHeader>
               <CardTitle className="text-xl font-bold text-gray-800 dark:text-white">
                 Tendencia de Gastos
@@ -255,97 +203,17 @@ export default function DashboardPage() {
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>
-          </Card>
+          </Card> */}
+          <div className="col-span-4">
+            <SpendingTrendChart transactions={transactions} />
+          </div>
 
-          <Card className="col-span-3 bg-white shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-xl font-bold text-gray-800 dark:text-white">
-                Gastos por Categoría
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                  <Pie
-                    data={gastosPorCategoria}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {gastosPorCategoria.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                {gastosPorCategoria.map((category, index) => (
-                  <div key={index} className="flex items-center">
-                    <div
-                      className={`mr-2 h-3 w-3 rounded-full`}
-                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                    ></div>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {category.name}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <div className="col-span-3">
+            <ExpenseCategoryChart transactions={transactions} COLORS={COLORS} />
+          </div>
         </div>
 
-        <Card className="bg-white shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-xl font-bold text-gray-800 dark:text-white">
-              Transacciones Recientes
-            </CardTitle>
-            <CardDescription className="text-gray-600 dark:text-gray-400">
-              Has realizado 4 transacciones este mes
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              {transacciones.map((transaccion, index) => (
-                <div
-                  className="flex items-center rounded-lg bg-gray-100 p-3 dark:bg-gray-700"
-                  key={index}
-                >
-                  <div
-                    className={`rounded-full p-2 ${transaccion.tipo === "ingreso" ? "bg-green-500" : "bg-red-500"}`}
-                  >
-                    {transaccion.tipo === "ingreso" ? (
-                      <ArrowUpIcon className="h-4 w-4 text-white" />
-                    ) : (
-                      <ArrowDownIcon className="h-4 w-4 text-white" />
-                    )}
-                  </div>
-                  <div className="ml-4 flex-grow space-y-1">
-                    <p className="text-sm font-medium leading-none text-gray-800 dark:text-white">
-                      {transaccion.descripcion}
-                    </p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      {transaccion.fecha} - {transaccion.categoria}
-                    </p>
-                  </div>
-                  <div
-                    className={`font-medium ${transaccion.tipo === "ingreso" ? "text-green-500" : "text-red-500"}`}
-                  >
-                    {transaccion.tipo === "ingreso" ? "+" : "-"}$
-                    {transaccion.monto}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <LatestTransactions transactions={transactions} />
       </div>
     </div>
   );
