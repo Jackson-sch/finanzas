@@ -84,17 +84,15 @@ export default function Prestamos() {
       <header className="flex items-center justify-between rounded-md bg-primary px-6 py-4 text-primary-foreground">
         <h1 className="text-2xl font-bold">Gestión de préstamos</h1>
       </header>
-      <main className="flex-1 pt-6">
+      <main className="flex-1 pt-6 gap-4 ">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <RegisterForm onSubmit={handleSubmit} onSimulator={handleSimulator} />
           <DetailsLoan simulatorData={simulatorData} />
         </div>
-        <Separator className="my-6" />
 
-        <div className="mb-5">
+        <div className="mb-5 mt-6">
           <ListLoans loans={loans} />
         </div>
-        <Separator className="my-6" />
       </main>
     </div>
   );

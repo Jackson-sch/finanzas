@@ -83,7 +83,7 @@ export default function Payments() {
   };
 
   return (
-    <div className="flex h-screen flex-col">
+    <div className="flex h-screen flex-col px-4">
       <header className="flex items-center justify-between rounded-md bg-primary px-6 py-4 text-primary-foreground">
         <h1 className="text-2xl font-bold">Gestión pagos de préstamos</h1>
       </header>

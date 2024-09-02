@@ -74,6 +74,7 @@ export default function TransactionForm({
           ? "Modifica los detalles de la transacción"
           : "Ingrese los detalles de la nueva transacción"
       }
+      className="shadow-lg"
     >
       <Form {...form}>
         <form

@@ -57,6 +57,7 @@ export default function FinancialSummary({
     <CardComponent
       title="Resumen financiero"
       description="Resumen rápido de los ingresos y egresos"
+      className="shadow-lg"
     >
       <div className="mb-6 flex justify-between items-center">
         <h2 className="text-2xl font-bold">Período actual</h2>

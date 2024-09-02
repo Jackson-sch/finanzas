@@ -433,7 +433,7 @@ export default function TransactionV2() {
   }, []);
 
   return (
-    <div className="container mx-auto space-y-8 p-4">
+    <div className=" mx-auto space-y-8 p-4">
       <h1 className="mb-6 text-3xl font-bold">Gestión de Ingresos y Egresos</h1>
 
       <FinancialSummary

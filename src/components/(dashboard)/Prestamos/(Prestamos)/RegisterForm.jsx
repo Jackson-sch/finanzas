@@ -99,6 +99,7 @@ export default function RegisterForm({ onSubmit, onSimulator }) {
     <CardComponent
       title="Registro de Préstamo"
       description="Ingrese los detalles del préstamo que desea registrar."
+      className="shadow-lg"
     >
       <Form {...form}>
         <form

@@ -1,137 +1,213 @@
-
-'use client'
-import React from 'react'
+"use client";
+"use client";
+import React, { useEffect, useState } from "react";
+import { subDays, isWithinInterval } from "date-fns";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
-import { AlertTriangle, BarChart2, CreditCard, Target, TrendingUp, Wallet } from 'lucide-react';
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  CreditCardIcon,
+  DollarSignIcon,
+  TrendingUpIcon,
+  TrendingDownIcon,
+} from "lucide-react";
+import { fetchLoans, fetchTransactions } from "@/utils/fetchingData";
+import CurrentLoans from "@/components/(dashboard)/Dashboard/CurrentLoans";
+import LatestTransactions from "@/components/(dashboard)/Dashboard/LatestTransactions";
+import ExpenseCategoryChart from "@/components/(dashboard)/Dashboard/ExpenseCategoryChart";
+import { COLORS } from "@/components/Colors";
+import SpendingTrendChart from "@/components/(dashboard)/Dashboard/SpendingTrendChart";
+import IncomeAndExpenseChart from "@/components/(dashboard)/Dashboard/IncomeAndExpenseChart";
+import { currencyFormatter } from "@/components/CurrencyFormatter";
+import StatCard from "@/components/(dashboard)/Dashboard/StatCard";
+import {
+  calculatePercentageChange,
+  calculateTotal,
+} from "@/utils/auxiliaryFunctions";
 
-export default function FinanceDashboard() {
+export default function DashboardPage() {
+  const [loans, setLoans] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [balanceTotal, setBalanceTotal] = useState(0);
+  const [balanceChange, setBalanceChange] = useState(0);
+  const [ingresos, setIngresos] = useState(0);
+  const [egresos, setEgresos] = useState(0);
+  const [ingresoChange, setIngresoChange] = useState(0);
+  const [egresoChange, setEgresoChange] = useState(0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const loansData = await fetchLoans();
+        setLoans(loansData);
+
+        const transactionsData = await fetchTransactions();
+        setTransactions(transactionsData);
+
+        // Calcular ingresos y egresos totales de todas las transacciones
+        const totalIngresos = calculateTotal(transactionsData, "ingreso");
+        const totalEgresos = calculateTotal(transactionsData, "egreso");
+        const totalBalance = totalIngresos - totalEgresos;
+
+        // Calcular ingresos y egresos de los últimos 30 días
+        const now = new Date();
+        const thirtyDaysAgo = subDays(now, 30);
+        const sixtyDaysAgo = subDays(now, 60);
+
+        const last30DaysTransactions = transactionsData.filter((transaction) =>
+          isWithinInterval(new Date(transaction.date), {
+            start: thirtyDaysAgo,
+            end: now,
+          }),
+        );
+
+        const previous30DaysTransactions = transactionsData.filter(
+          (transaction) =>
+            isWithinInterval(new Date(transaction.date), {
+              start: sixtyDaysAgo,
+              end: thirtyDaysAgo,
+            }),
+        );
+
+        const last30DaysIngresos = calculateTotal(
+          last30DaysTransactions,
+          "ingreso",
+        );
+        const last30DaysEgresos = calculateTotal(
+          last30DaysTransactions,
+          "egreso",
+        );
+        const last30DaysBalance = last30DaysIngresos - last30DaysEgresos;
+
+        const previous30DaysIngresos = calculateTotal(
+          previous30DaysTransactions,
+          "ingreso",
+        );
+        const previous30DaysEgresos = calculateTotal(
+          previous30DaysTransactions,
+          "egreso",
+        );
+        const previous30DaysBalance =
+          previous30DaysIngresos - previous30DaysEgresos;
+
+        // Calcular el porcentaje de cambio entre los últimos 30 días y los 30 días anteriores
+        const ingresoChange = calculatePercentageChange(
+          last30DaysIngresos,
+          previous30DaysIngresos,
+        );
+        const egresoChange = calculatePercentageChange(
+          last30DaysEgresos,
+          previous30DaysEgresos,
+        );
+        const balanceChange = calculatePercentageChange(
+          last30DaysBalance,
+          previous30DaysBalance,
+        );
+
+        setBalanceTotal(totalBalance);
+        setIngresos(totalIngresos);
+        setEgresos(totalEgresos);
+        setIngresoChange(ingresoChange);
+        setEgresoChange(egresoChange);
+        setBalanceChange(balanceChange);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
-    <div className="p-4 bg-background">
-      <h1 className="text-3xl font-bold mb-6">Dashboard Financiero Personal</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* Resumen de saldo actual */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Saldo Actual</CardTitle>
-            <Wallet className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">$12,345.67</div>
-            <p className="text-xs text-muted-foreground">+2.5% desde el mes pasado</p>
-          </CardContent>
-        </Card>
+    <div className="flex-col md:flex">
+      <div className="flex-1 space-y-4 p-8 pt-6">
+        <div className="flex items-center justify-between space-y-2">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-800 dark:text-white">
+            Dashboard Financiero
+          </h2>
+          <div className="flex items-center space-x-2">
+            <Button className="bg-blue-600 text-white hover:bg-blue-700">
+              Generar Reporte
+            </Button>
+          </div>
+        </div>
 
-        {/* Ingresos vs. Gastos */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Ingresos vs. Gastos</CardTitle>
-            <BarChart2 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-sm font-medium">Ingresos: $5,000</div>
-            <div className="text-sm font-medium">Gastos: $3,500</div>
-            <Progress value={70} className="mt-2" />
-          </CardContent>
-        </Card>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            title="Balance Total"
+            amount={balanceTotal}
+            change={balanceChange}
+            icon={DollarSignIcon}
+            changeIcon={balanceChange >= 0 ? TrendingUpIcon : TrendingDownIcon}
+            changeColor={balanceChange >= 0 ? "text-green-500" : "text-red-500"}
+          />
+          <StatCard
+            title="Ingresos"
+            amount={ingresos}
+            change={ingresoChange}
+            icon={ArrowUpIcon}
+            changeIcon={ingresoChange >= 0 ? TrendingUpIcon : TrendingDownIcon}
+            changeColor={ingresoChange >= 0 ? "text-green-500" : "text-red-500"}
+          />
+          <StatCard
+            title="Egresos"
+            amount={egresos}
+            change={egresoChange}
+            icon={ArrowDownIcon}
+            changeIcon={egresoChange >= 0 ? TrendingDownIcon : TrendingUpIcon}
+            changeColor={egresoChange >= 0 ? "text-red-500" : "text-green-500"}
+          />
 
-        {/* Distribución de gastos */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Distribución de Gastos</CardTitle>
-            <PieChart className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-sm">
-              <div>Vivienda: 40%</div>
-              <div>Alimentación: 20%</div>
-              <div>Transporte: 15%</div>
-              <div>Otros: 25%</div>
-            </div>
-          </CardContent>
-        </Card>
+          <Card className="bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                Préstamos Activos
+              </CardTitle>
+              <CreditCardIcon className="h-4 w-4 text-blue-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-gray-800 dark:text-white">
+                {loans.length}
+              </div>
+              <p className="text-xs text-blue-500">
+                Total:{" "}
+                {currencyFormatter.format(
+                  loans
+                    .reduce((total, loan) => total + loan.amount, 0)
+                    .toFixed(2),
+                )}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
 
-        {/* Metas de ahorro */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Metas de Ahorro</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-sm font-medium">Vacaciones: $5,000 / $10,000</div>
-            <Progress value={50} className="mt-2" />
-          </CardContent>
-        </Card>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          <div className="col-span-4">
+            <IncomeAndExpenseChart transactions={transactions} />
+          </div>
+          <div className="col-span-3">
+            <CurrentLoans loans={loans} />
+          </div>
+        </div>
 
-        {/* Deudas y préstamos */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Deudas y Préstamos</CardTitle>
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-sm">
-              <div>Hipoteca: $150,000</div>
-              <div>Préstamo Auto: $15,000</div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          <div className="col-span-4">
+            <SpendingTrendChart transactions={transactions} />
+          </div>
 
-        {/* Inversiones */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Inversiones</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">$50,000</div>
-            <p className="text-xs text-muted-foreground">+5.2% de rendimiento anual</p>
-          </CardContent>
-        </Card>
+          <div className="col-span-3">
+            <ExpenseCategoryChart transactions={transactions} COLORS={COLORS} />
+          </div>
+        </div>
 
-        {/* Flujo de efectivo */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Últimos Movimientos</CardTitle>
-            <LineChart className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-sm">
-              <div>Supermercado: -$120</div>
-              <div>Salario: +$2,500</div>
-              <div>Restaurante: -$45</div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Alertas financieras */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Alertas Financieras</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-sm text-red-500">
-              Gasto en entretenimiento excede el presupuesto
-            </div>
-          </CardContent>
-        </Card>
+        <LatestTransactions transactions={transactions} />
       </div>
     </div>
-  )
+  );
 }

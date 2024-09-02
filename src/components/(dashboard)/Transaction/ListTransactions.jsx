@@ -90,6 +90,7 @@ export default function ListTransactions({
     <CardComponent
       title="Listado de transacciones"
       description="Listado de transacciones"
+      className="shadow-lg"
     >
       <div className="mb-6 grid gap-6">
         <div className="flex items-center justify-between gap-4">
