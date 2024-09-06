@@ -1,13 +1,7 @@
 "use client";
-"use client";
 import React, { useEffect, useState } from "react";
 import { subDays, isWithinInterval } from "date-fns";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   ArrowDownIcon,
@@ -24,14 +18,14 @@ import ExpenseCategoryChart from "@/components/(dashboard)/Dashboard/ExpenseCate
 import { COLORS } from "@/components/Colors";
 import SpendingTrendChart from "@/components/(dashboard)/Dashboard/SpendingTrendChart";
 import IncomeAndExpenseChart from "@/components/(dashboard)/Dashboard/IncomeAndExpenseChart";
-import { currencyFormatter } from "@/components/CurrencyFormatter";
+import { currencyFormatter } from "@/utils/CurrencyFormatter";
 import StatCard from "@/components/(dashboard)/Dashboard/StatCard";
 import {
   calculatePercentageChange,
   calculateTotal,
 } from "@/utils/auxiliaryFunctions";
 
-export default function DashboardPage() {
+export default function DashboardPage({ session }) {
   const [loans, setLoans] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [balanceTotal, setBalanceTotal] = useState(0);
@@ -45,14 +39,20 @@ export default function DashboardPage() {
     const fetchData = async () => {
       try {
         const loansData = await fetchLoans();
-        setLoans(loansData);
+        // filtrar solo prestamos que corresponden al usuario logueado en la sesión campo a comparar email
+        const loansDataFiltered = loansData.filter((loan) => loan.email === session.user.email);
+        setLoans(loansDataFiltered);
 
         const transactionsData = await fetchTransactions();
-        setTransactions(transactionsData);
+        // Filtra todas las transacciones del mismo usuario que ah iniciado sesión la validación sera a del email si ambos coinciden me los muestras
+        const filteredTransactions = transactionsData.filter(
+          (transaction) => transaction.email === session.user.email
+        )
+        setTransactions(filteredTransactions);
 
         // Calcular ingresos y egresos totales de todas las transacciones
-        const totalIngresos = calculateTotal(transactionsData, "ingreso");
-        const totalEgresos = calculateTotal(transactionsData, "egreso");
+        const totalIngresos = calculateTotal(filteredTransactions, "ingreso");
+        const totalEgresos = calculateTotal(filteredTransactions, "egreso");
         const totalBalance = totalIngresos - totalEgresos;
 
         // Calcular ingresos y egresos de los últimos 30 días
@@ -60,14 +60,14 @@ export default function DashboardPage() {
         const thirtyDaysAgo = subDays(now, 30);
         const sixtyDaysAgo = subDays(now, 60);
 
-        const last30DaysTransactions = transactionsData.filter((transaction) =>
+        const last30DaysTransactions = filteredTransactions.filter((transaction) =>
           isWithinInterval(new Date(transaction.date), {
             start: thirtyDaysAgo,
             end: now,
           }),
         );
 
-        const previous30DaysTransactions = transactionsData.filter(
+        const previous30DaysTransactions = filteredTransactions.filter(
           (transaction) =>
             isWithinInterval(new Date(transaction.date), {
               start: sixtyDaysAgo,

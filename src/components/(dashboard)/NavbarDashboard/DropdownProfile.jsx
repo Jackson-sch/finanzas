@@ -70,7 +70,7 @@ export async function DropdownProfile() {
 }
 
 const AvatarProfile = ({ user }) => {
-  console.log("🚀 ~ AvatarProfile ~ user:", user);
+
   return (
     <div className="flex items-center gap-2 hover:cursor-pointer">
       <div>

@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useState } from "react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,10 +11,10 @@ import {
 } from "@/utils/fetchingData";
 import FinancialSummary from "./FinancialSummary";
 import ListTransactions from "./ListTransactions";
-import Categories from "./Categories";
-import Tags from "./Tags";
+import Categories from "../Categories/Categories";
+import Tags from "../Tags/Tags";
 
-export default function TransactionV2() {
+export default function Transaction({ session }) {
   const [transactions, setTransactions] = useState([]);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [categories, setCategories] = useState([]);
@@ -30,233 +31,150 @@ export default function TransactionV2() {
     balance: 0,
   });
 
-  const addTransaction = async (data) => {
+  const handleApiRequest = async (url, method, data = null) => {
+    const options = {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+    if (data) options.body = JSON.stringify(data);
+
+    const response = await fetch(url, options);
+
+    if (!response.ok) throw new Error("Error en la respuesta de la API");
+    return response.json();
+  };
+
+  const handleTransaction = async (
+    method,
+    url,
+    data = null,
+    successTitle,
+    successDescription,
+  ) => {
     try {
-      const response = await fetch("/api/transactions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-      if (response.ok) {
-        toast({
-          title: "Transacción registrada",
-          description: "La transacción ha sido registrada exitosamente",
-          status: "success",
-        });
-        const data = await response.json();
-        setTransactions([...transactions, data]);
-        updateSummary([...transactions, data]);
-      } else {
-        toast({
-          title: "Error",
-          description: "Ocurrió un error al registrar la transacción",
-          status: "error",
-        });
-      }
-    } catch (error) {
-      console.error("Error al registrar la transacción:", error.message);
+      const transaction = await handleApiRequest(url, method, data);
       toast({
-        title: "Error",
-        description: "Ocurrió un error al registrar la transacción",
-        status: "error",
+        title: successTitle,
+        status: "success",
+        description: successDescription,
       });
+      return transaction;
+    } catch (error) {
+      console.error("Error en la respuesta de la API:", error);
+      toast({
+        title: "Error en la respuesta de la API",
+        status: "error",
+        description: error.message,
+      });
+    }
+  };
+
+  const addTransaction = async (data) => {
+    const transaction = await handleTransaction(
+      "POST",
+      "/api/transactions",
+      data,
+      "Transacción registrada",
+      "La transacción se ha registrado correctamente",
+    );
+    if (transaction) {
+      setTransactions([...transactions, transaction]);
+      updateSummary([...transactions, transaction]);
     }
   };
 
   const updateTransaction = async (id, updatedData) => {
-    try {
-      const response = await fetch(`/api/transactions/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedData),
-      });
-      if (response.ok) {
-        toast({
-          title: "Transacción actualizada",
-          description: "La transacción ha sido actualizada exitosamente",
-          status: "success",
-        });
-        const updatedTransaction = await response.json();
-        const updatedTransactions = transactions.map((transaction) =>
-          transaction._id === id ? updatedTransaction : transaction,
-        );
-        setTransactions(updatedTransactions);
-        updateSummary(updatedTransactions);
-        setSelectedTransaction(null);
-      } else {
-        toast({
-          title: "Error",
-          description: "Ocurrió un error al actualizar la transacción",
-          status: "error",
-        });
-      }
-    } catch (error) {
-      console.error("Error al actualizar la transacción:", error.message);
-      toast({
-        title: "Error",
-        description: "Ocurrió un error al actualizar la transacción",
-        status: "error",
-      });
+    const transaction = await handleTransaction(
+      "PUT",
+      `/api/transactions/${id}`,
+      updatedData,
+      "Transacción actualizada",
+      "La transacción se ha actualizado correctamente",
+    );
+
+    if (transaction) {
+      /* const updatedTransactions = transactions.map((t) =>
+        t._id === id ? transaction : t,
+      ); */
+      const updatedTransactions = [...transactions, transaction];
+      setTransactions(updatedTransactions);
+      updateSummary(updatedTransactions);
     }
   };
 
-  const handleEditTransaction = (transaction) => {
-    setTransactions(transaction);
-  };
-
   const deleteTransaction = async (id) => {
-    try {
-      const response = await fetch(`/api/transactions/${id}`, {
-        method: "DELETE",
-      });
+    const success = await handleTransaction(
+      "DELETE",
+      `/api/transactions/${id}`,
+      null,
+      "Transacción eliminada",
+      "La transacción se ha eliminado correctamente",
+    );
 
-      if (!response.ok) {
-        throw new Error("Ocurrió un error al eliminar la transacción");
-      }
-
+    if (success) {
       const updatedTransactions = transactions.filter((t) => t._id !== id);
-      toast({
-        title: "Transacción eliminada",
-        description: "La transacción ha sido eliminada correctamente",
-        status: "success",
-      });
       setTransactions(updatedTransactions);
       updateSummary(updatedTransactions);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description:
-          "Ocurrió un error al eliminar la transacción " + error.message,
-        status: "error",
-      });
     }
   };
 
   const addCategory = async (data) => {
-    try {
-      const response = await fetch("/api/categories", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
+    const category = await handleTransaction(
+      "POST",
+      "/api/categories",
+      data,
+      "Categoría registrada",
+      "La categoría se ha registrado correctamente",
+    );
 
-      if (response.ok) {
-        const data = await response.json();
-        toast({
-          title: "Categoría registrada",
-          description: "La categoría se ha registrado correctamente",
-          status: "success",
-        });
-        setCategories([...categories, data]);
-      } else {
-        toast({
-          title: "Error",
-          description: "Ocurrió un error al registrar la categoría",
-          status: "error",
-        });
-      }
-    } catch (error) {
-      console.error("Error al registrar la categoría:", error.message);
-      toast({
-        title: "Error",
-        description:
-          "Ocurrió un error al registrar la categoría" + error.message,
-        status: "error",
-      });
+    if (category) {
+      setCategories([...categories, category]);
     }
   };
 
   const deleteCategory = async (id) => {
-    try {
-      const response = await fetch(`/api/categories/${id}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) {
-        throw new Error("Ocurrió un error al eliminar la categoría");
-      }
+    const success = await handleTransaction(
+      "DELETE",
+      `/api/categories/${id}`,
+      null,
+      "Categoría eliminada",
+      "La categoría se ha eliminado correctamente",
+    );
 
+    if (success) {
       const updatedCategories = categories.filter((c) => c._id !== id);
-
-      toast({
-        title: "Categoría eliminada",
-        description: "La categoría se ha eliminado correctamente",
-        status: "success",
-      });
-
       setCategories(updatedCategories);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description:
-          "Ocurrió un error al eliminar la categoría" + error.message,
-        status: "error",
-      });
     }
   };
 
   const addTag = async (data) => {
-    try {
-      const response = await fetch("/api/tags", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        toast({
-          title: "Etiqueta registrada",
-          description: "La etiqueta se ha registrado correctamente",
-          status: "success",
-        });
-        setTags([...tags, data]);
-      } else {
-        toast({
-          title: "Error",
-          description: "Ocurrió un error al registrar la etiqueta",
-          status: "error",
-        });
-      }
-    } catch (error) {
-      console.error("Error al registrar la etiqueta:", error.message);
-      toast({
-        title: "Error",
-        description: "Ocurrió un error al registrar la etiqueta",
-        status: "error",
-      });
+    const tag = await handleTransaction(
+      "POST",
+      "/api/tags",
+      data,
+      "Etiqueta registrada",
+      "La etiqueta se ha registrado correctamente",
+    );
+
+    if (tag) {
+      setTags([...tags, tag]);
     }
   };
 
   const deleteTag = async (id) => {
-    try {
-      const response = await fetch(`/api/tags/${id}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) {
-        throw new Error("Ocurrió un error al eliminar la etiqueta");
-      }
+    const success = await handleTransaction(
+      "DELETE",
+      `/api/tags/${id}`,
+      null,
+      "Etiqueta eliminada",
+      "La etiqueta se ha eliminado correctamente",
+    );
 
+    if (success) {
       const updatedTags = tags.filter((t) => t._id !== id);
-      toast({
-        title: "Etiqueta eliminada",
-        description: "La etiqueta se ha eliminado correctamente",
-        status: "success",
-      });
-
       setTags(updatedTags);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Ocurrió un error al eliminar la etiqueta",
-        status: "error",
-      });
     }
   };
 
@@ -279,7 +197,7 @@ export default function TransactionV2() {
   // Función para obtener datos en función del período
   const fetchDataForPeriod = async (period) => {
     let filteredTransactions = transactions;
-    
+
     // Filtrar transacciones según el período seleccionado
     switch (period) {
       case "diario":
@@ -333,7 +251,7 @@ export default function TransactionV2() {
         }
         return acc;
       },
-      { ingresos: 0, egresos: 0 }
+      { ingresos: 0, egresos: 0 },
     );
     currentSummary.balance = currentSummary.ingresos - currentSummary.egresos;
     setSummary(currentSummary);
@@ -362,7 +280,7 @@ export default function TransactionV2() {
         lastPeriodDate = new Date(
           currentDate.getFullYear(),
           currentDate.getMonth() - 1,
-          1
+          1,
         );
         break;
       case "anual":
@@ -373,7 +291,7 @@ export default function TransactionV2() {
     }
 
     const lastPeriodTransactions = transactions.filter(
-      (transaction) => new Date(transaction.date) < lastPeriodDate
+      (transaction) => new Date(transaction.date) < lastPeriodDate,
     );
 
     const previousSummary = lastPeriodTransactions.reduce(
@@ -385,7 +303,7 @@ export default function TransactionV2() {
         }
         return acc;
       },
-      { ingresos: 0, egresos: 0 }
+      { ingresos: 0, egresos: 0 },
     );
 
     previousSummary.balance =
@@ -397,44 +315,45 @@ export default function TransactionV2() {
     const fetchData = async () => {
       try {
         const transactionsData = await fetchTransactions();
-        setTransactions(transactionsData);
-        fetchDataForPeriod(summaryPeriod); // Inicializar datos con el período seleccionado
+        // Filtra las transacciones por usuario actual por su campo email
+        const filteredTransactions = transactionsData.filter(
+          (transaction) => transaction.email === session?.user?.email,
+        );
+        setTransactions(filteredTransactions);
+        updateSummary(filteredTransactions);
+        calculatePreviousSummary(filteredTransactions);
+
+        if (summaryPeriod) {
+          fetchDataForPeriod(summaryPeriod); // Inicializar datos con el período seleccionado
+        }
 
         const categoriesData = await fetchCategories();
-        setCategories(categoriesData);
+        const filteredCategories = categoriesData.filter(
+          (category) =>
+            !category.isUserAdded || category.email === session?.user?.email,
+        );
+        setCategories(filteredCategories);
 
         const tagsData = await fetchTags();
-        setTags(tagsData);
+        const filteredTags = tagsData.filter(
+          (tag) => !tag.isUserAdded || tag.email === session?.user?.email,
+        );
+        setTags(filteredTags);
       } catch (error) {
-        console.error("Error al obtener las transacciones:", error.message);
+        console.error("Error al obtener los datos:", error.message);
       }
     };
+
     fetchData();
-  }, [summaryPeriod]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const transactionsData = await fetchTransactions();
-        setTransactions(transactionsData);
-        updateSummary(transactionsData);
-        calculatePreviousSummary(transactionsData);
-
-        const categoriesData = await fetchCategories();
-        setCategories(categoriesData);
-
-        const tagsData = await fetchTags();
-        setTags(tagsData);
-      } catch (error) {
-        console.error("Error al obtener las transacciones:", error.message);
-      }
-    };
-    fetchData();
-  }, []);
+  }, [summaryPeriod, session?.user?.email]);
 
   return (
-    <div className=" mx-auto space-y-8 p-4">
-      <h1 className="mb-6 text-3xl font-bold">Gestión de Ingresos y Egresos</h1>
+    <div className="mx-auto space-y-8">
+      <header className="flex items-center justify-between rounded-md bg-primary px-6 py-4 text-primary-foreground">
+        <h1 className="text-2xl font-bold">
+          Gestión de Ingresos y Egresos
+        </h1>
+      </header>
 
       <FinancialSummary
         setSummaryPeriod={setSummaryPeriod}
@@ -457,6 +376,7 @@ export default function TransactionV2() {
             tags={tags}
             addTransaction={addTransaction}
             updateTransaction={updateTransaction}
+            session={session}
           />
 
           <ListTransactions
@@ -471,11 +391,17 @@ export default function TransactionV2() {
             categories={categories}
             addCategory={addCategory}
             deleteCategory={deleteCategory}
+            session={session}
           />
         </TabsContent>
 
         <TabsContent value="tags">
-          <Tags tags={tags} addTag={addTag} deleteTag={deleteTag} />
+          <Tags
+            tags={tags}
+            addTag={addTag}
+            deleteTag={deleteTag}
+            session={session}
+          />
         </TabsContent>
       </Tabs>
     </div>

@@ -39,10 +39,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarDaysIcon } from "lucide-react";
-import { paymentSchema } from "@/lib/validaciones/loan/loan";
+import { paymentSchema } from "@/lib/validaciones/payment/payment";
 import capitalize from "@/utils/capitalize";
 import { calculateSimulatorData } from "@/utils/loanSimulator/LoanSimulator";
 import { useToast } from "@/components/ui/use-toast";
+import { currencyFormatter } from "@/utils/CurrencyFormatter";
 
 export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
   const { toast } = useToast();
@@ -57,7 +58,6 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
     },
   });
 
-  const [fechaPago, setFechaPago] = useState(null);
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [filteredLoans, setFilteredLoans] = useState([]);
 
@@ -109,7 +109,6 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
       }
       handleSubmitPayment(data);
       form.reset();
-      setFechaPago(null);
       setSelectedLoan(null);
     }
   };
@@ -133,13 +132,6 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
 
     setFilteredLoans(loansWithPendingBalance);
   }, [loans, payments]); // Agregamos 'payments' como dependencia para actualizar la lista si cambian los pagos.
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("es-ES", {
-      style: "currency",
-      currency: "PEN",
-    }).format(amount);
-  };
 
   return (
     <Card>
@@ -194,14 +186,14 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
                                       className="font-normal"
                                     >
                                       <CreditCard className="mr-1 h-3 w-3" />
-                                      {formatCurrency(loan.amount)}
+                                      {currencyFormatter.format(loan.amount)}
                                     </Badge>
                                     <Badge
                                       variant="secondary"
                                       className="font-normal"
                                     >
                                       Cuota:{" "}
-                                      {formatCurrency(loanData.paymentAmount)}
+                                      {currencyFormatter.format(loanData.paymentAmount)}
                                     </Badge>
                                   </div>
                                 </SelectItem>

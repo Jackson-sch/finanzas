@@ -29,6 +29,12 @@ const userSchema = new Schema({
   authProviderId: {
     type: String,
   },
+  emailVerified: {
+    type: Boolean,
+    default: false,
+  },
+}, {
+  timestamps: true,
 });
 
 export default models?.User || model("User", userSchema);

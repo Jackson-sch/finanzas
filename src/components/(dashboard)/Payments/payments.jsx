@@ -1,10 +1,12 @@
-import PaymentHistory from "@/components/(dashboard)/Prestamos/(Prestamos)/PaymentHistory";
-import PaymentsLoad from "@/components/(dashboard)/Prestamos/(Prestamos)/PaymentsLoad";
+"use client";
+
 import { useToast } from "@/components/ui/use-toast";
 import { fetchLoans, fetchPayments } from "@/utils/fetchingData";
 import React, { useEffect, useState } from "react";
+import PaymentsLoad from "./PaymentsLoad";
+import PaymentHistory from "./PaymentHistory";
 
-export default function Payments() {
+export default function Payments({ session }) {
   const [loans, setLoans] = useState([]);
   const [payments, setPayments] = useState([]);
   const { toast } = useToast();
@@ -13,16 +15,29 @@ export default function Payments() {
     const fetchData = async () => {
       try {
         const loansData = await fetchLoans();
-        setLoans(loansData);
+        // Filtra los prestamos por usuario actual por su campo email
+        const data = loansData.filter(
+          (loan) => loan.email === session?.user?.email,
+        );
+        setLoans(data);
 
         const paymentsData = await fetchPayments();
-        setPayments(paymentsData);
+        // Filtra los pagos que corresponden al usuario actual
+        const filteredPayments = paymentsData.filter((payment) =>
+          data.some((loan) => loan._id === payment.loanId),
+        );
+        setPayments(filteredPayments);
       } catch (error) {
         console.error("Error al obtener los préstamos:", error.message);
+        toast({
+          title: "Error",
+          description: "No se pudieron obtener los datos de préstamos.",
+          status: "error",
+        });
       }
     };
     fetchData();
-  }, []);
+  }, [session]);
 
   const handleSubmitPayment = async (data) => {
     try {
@@ -35,13 +50,15 @@ export default function Payments() {
         body: JSON.stringify(data),
       });
       if (response.ok) {
+        const newPayment = await response.json();
         toast({
           title: "Pago registrado",
           description: "El pago ha sido registrado exitosamente",
           status: "success",
         });
-        setPayments([...payments, data]);
+        setPayments([...payments, newPayment]);
       } else {
+        const errorData = await response.json();
         toast({
           title: "Error",
           description: "Ocurrió un error al registrar el pago",
@@ -83,11 +100,11 @@ export default function Payments() {
   };
 
   return (
-    <div className="flex h-screen flex-col px-4">
+    <div className="mx-auto space-y-8">
       <header className="flex items-center justify-between rounded-md bg-primary px-6 py-4 text-primary-foreground">
         <h1 className="text-2xl font-bold">Gestión pagos de préstamos</h1>
       </header>
-      <main className="flex flex-col gap-4 pt-6">
+      <main className="flex flex-col gap-4">
         <div>
           <PaymentsLoad
             loans={loans}

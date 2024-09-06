@@ -1,6 +1,9 @@
-import { object, string } from "zod";
+import { object, string, number } from "zod";
 
 export const transactionSchema = object({
+  email: string({
+    required_error: "El correo electrónico del usuario es obligatorio.",
+  }).email("Debe ser un correo electrónico válido."),
   type: string({
     required_error: "El tipo de transacción es obligatorio.",
   }),

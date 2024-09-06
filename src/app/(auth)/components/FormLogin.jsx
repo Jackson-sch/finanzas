@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { IconBrandGithub, IconBrandGoogleFilled } from "@tabler/icons-react";
 import { useToast } from "@/components/ui/use-toast";
 import { loginSchema } from "@/lib/zod";
-import { loginAction } from "@/action/User";
+import { loginAction } from "@/action/auth-action";
 import { useState, useTransition } from "react";
 
 export default function FormLogin({ isVerified, OAuthAccountNotLinked }) {
@@ -62,13 +62,12 @@ export default function FormLogin({ isVerified, OAuthAccountNotLinked }) {
     <div>
       {isVerified && (
         <p className="mb-5 text-center text-sm text-green-500">
-          Email verified, you can now login
+          Correo electrónico verificado, ahora puede iniciar sesión
         </p>
       )}
       {OAuthAccountNotLinked && (
         <p className="mb-5 text-center text-sm text-red-500">
-          To confirm your identity, sign in with the same account you used
-          originally.
+          Para confirmar su identidad, inicie sesión con la misma cuenta que usó para registrarse originalmente.
         </p>
       )}
       <Form {...form}>
@@ -117,7 +116,9 @@ export default function FormLogin({ isVerified, OAuthAccountNotLinked }) {
             />
           </div>
 
-          <Button type="submit">Sign in</Button>
+          <Button type="submit" disabled={isPending}>
+            {isPending ? "Iniciando sesión..." : "Iniciar sesión"}
+          </Button>
 
           <p className="text-center text-sm text-gray-500">
             Don't have an account?{" "}

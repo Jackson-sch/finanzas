@@ -32,12 +32,15 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import capitalize from "@/utils/capitalize";
-import { formatDate } from "@/utils/formattedDate";
 import { calculateSimulatorData } from "@/utils/loanSimulator/LoanSimulator";
 import { CardComponent } from "@/components/CardComponent";
-import { currencyFormatter } from "@/components/CurrencyFormatter";
+import { currencyFormatter } from "@/utils/CurrencyFormatter";
+import { Button } from "@/components/ui/button";
+import { Trash } from "lucide-react";
+import { formatLocalDate } from "@/utils/formatDate";
+import InputSearch from "@/components/InputSearch";
 
-export default function Component({ loans }) {
+export default function Component({ loans, deleteLoan }) {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("date");
   const [currentPage, setCurrentPage] = useState(1);
@@ -45,11 +48,13 @@ export default function Component({ loans }) {
 
   const filteredAndSortedLoans = useMemo(() => {
     return loans
-      .filter((loan) =>
-        calculateSimulatorData(loan)
-          .borrower.toLowerCase()
-          .includes(search.toLowerCase()),
-      )
+      .filter((loan) => {
+        const simulatorData = calculateSimulatorData(loan);
+        return (
+          simulatorData.borrower.toLowerCase().includes(search.toLowerCase()) ||
+          loan.borrower.toLowerCase().includes(search.toLowerCase()) // Filtro por el campo adicional borrower
+        );
+      })
       .sort((a, b) => {
         if (sortBy === "date") {
           return new Date(b.date) - new Date(a.date);
@@ -58,6 +63,9 @@ export default function Component({ loans }) {
             calculateSimulatorData(b).loanAmount -
             calculateSimulatorData(a).loanAmount
           );
+        } else if (sortBy === "borrower") {
+          // Ordenar por borrower si se selecciona
+          return a.borrower.localeCompare(b.borrower);
         }
         return 0;
       });
@@ -103,6 +111,7 @@ export default function Component({ loans }) {
     return items;
   };
 
+
   return (
     <CardComponent
       title="Lista de prestatarios"
@@ -110,12 +119,13 @@ export default function Component({ loans }) {
       className="w-full shadow-lg"
     >
       <div className="mb-4 flex justify-between">
-        <Input
-          placeholder="Buscar por prestatario"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="max-w-sm"
-        />
+        <div className="max-w-sm flex-1">
+          <InputSearch
+            setSearchTerm={setSearch}
+            searchTerm={search}
+            placeholder="Buscar por prestatario"
+          />
+        </div>
         <Select value={sortBy} onValueChange={setSortBy}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Ordenar por" />
@@ -123,6 +133,7 @@ export default function Component({ loans }) {
           <SelectContent>
             <SelectItem value="date">Fecha</SelectItem>
             <SelectItem value="amount">Monto</SelectItem>
+            <SelectItem value="borrower">Prestatario</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -131,22 +142,44 @@ export default function Component({ loans }) {
           <TableRow>
             <TableHead>Fecha</TableHead>
             <TableHead>Prestatario</TableHead>
-            <TableHead>Monto Inicial</TableHead>
-            <TableHead>Pago mensual</TableHead>
-            <TableHead>Total</TableHead>
+            <TableHead className="text-right">Monto Inicial</TableHead>
+            <TableHead className="text-right">Pago mensual</TableHead>
+            <TableHead className="text-right">Total</TableHead>
+            <TableHead className="text-right">Acciones</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {paginatedLoans.map((loan, index) => {
+          {filteredAndSortedLoans.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={6} className="h-24 text-center capitalize text-xl">
+                No hay prestatarios registrados
+              </TableCell>
+            </TableRow>
+          )}
+          {paginatedLoans.map((loan) => {
             const loanData = calculateSimulatorData(loan);
             return (
-              <TableRow key={index}>
-                <TableCell>{formatDate(loan.date)}</TableCell>
+              <TableRow key={loan._id}>
+                <TableCell>{formatLocalDate(loan.date)}</TableCell>
                 <TableCell>{capitalize(loanData.borrower)}</TableCell>
-                <TableCell>{currencyFormatter.format(loanData.loanAmount)}</TableCell>
-                <TableCell>{currencyFormatter.format(loanData.paymentAmount)}</TableCell>
-                <TableCell className="font-bold">
+                <TableCell className="text-right">
+                  {currencyFormatter.format(loanData.loanAmount)}
+                </TableCell>
+                <TableCell className="text-right">
+                  {currencyFormatter.format(loanData.paymentAmount)}
+                </TableCell>
+                <TableCell className="text-right font-bold">
                   {currencyFormatter.format(loanData.totalAmount)}
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="mr-2"
+                    onClick={() => deleteLoan(loan._id)}
+                  >
+                    <Trash className="h-4 w-4" />
+                  </Button>
                 </TableCell>
               </TableRow>
             );

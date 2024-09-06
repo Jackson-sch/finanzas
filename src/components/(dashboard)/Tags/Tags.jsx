@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -18,16 +18,32 @@ import { Tag } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { tagSchema } from "@/lib/validaciones/tags/tags";
 
-export default function Tags({ tags, addTag, deleteTag }) {
-  console.log("🚀 ~ Tags ~ tags:", tags)
+export default function Tags({ tags, addTag, deleteTag, session }) {
+  const [combinedTags, setCombinedTags] = useState([]);
+
   const form = useForm({
     resolver: zodResolver(tagSchema),
     defaultValues: {
       name: "",
+      email: session?.user?.email || "",
+      isUserAdded: false,
     },
   });
 
+  useEffect(() => {
+    // Combina las etiquetas predeterminadas con las del usuario
+    const defaultTags = tags.filter((tag) => !tag.isUserAdded);
+    const userTags = tags.filter(
+      (tag) => tag.isUserAdded && tag.email === session?.user?.email
+    );
+
+    setCombinedTags([...defaultTags, ...userTags]);
+  }, [tags, session]);
+
   const handleSubmit = async (data) => {
+    // marcar las etiquetas como agregadas por el usuario
+    data.email = session?.user?.email;
+    data.isUserAdded = true;
     await addTag(data);
     form.reset();
   };
@@ -65,18 +81,20 @@ export default function Tags({ tags, addTag, deleteTag }) {
         </Form>
       </div>
       <div className="flex flex-wrap gap-2">
-        {tags.map((tag) => (
+        {combinedTags.map((tag) => (
           <Badge key={tag._id} variant="outline" className="px-3 py-1 text-sm">
             {tag.name}
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="ml-1 h-auto p-0 text-xs"
-              onClick={() => deleteTag(tag._id)}
-            >
-              ×
-            </Button>
+            {tag.isUserAdded && tag.email === session?.user?.email && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="ml-1 h-auto p-0 text-xs"
+                onClick={() => deleteTag(tag._id)}
+              >
+                ×
+              </Button>
+            )}
           </Badge>
         ))}
       </div>

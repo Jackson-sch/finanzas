@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { addDays, format, isWithinInterval } from "date-fns";
+import { format, isWithinInterval } from "date-fns";
+import { es } from "date-fns/locale";
 import { CardComponent } from "../../CardComponent";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -15,9 +16,8 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Search, Calendar as CalendarIcon } from "lucide-react";
+import { Edit, Trash2, Calendar as CalendarIcon } from "lucide-react";
 import capitalize from "@/utils/capitalize";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -25,7 +25,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { DateRange } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
 import {
@@ -34,6 +33,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import InputSearch from "@/components/InputSearch";
+import { formatLocalDate } from "@/utils/formatDate";
+import { currencyFormatter } from "@/utils/CurrencyFormatter";
 
 export default function ListTransactions({
   transactions,
@@ -127,11 +128,11 @@ export default function ListTransactions({
                     {date?.from ? (
                       date.to ? (
                         <>
-                          {format(date.from, "LLL dd, y")} -{" "}
-                          {format(date.to, "LLL dd, y")}
+                          {format(date.from, "LLL dd, y", { locale: es })} -{" "}
+                          {format(date.to, "LLL dd, y", { locale: es })}
                         </>
                       ) : (
-                        format(date.from, "LLL dd, y")
+                        format(date.from, "LLL dd, y", { locale: es })
                       )
                     ) : (
                       <span>Selecciona un rango de fechas</span>
@@ -146,6 +147,7 @@ export default function ListTransactions({
                     selected={date}
                     onSelect={setDate}
                     numberOfMonths={2}
+                    locale={es}
                   />
                 </PopoverContent>
               </Popover>
@@ -167,11 +169,21 @@ export default function ListTransactions({
             </TableRow>
           </TableHeader>
           <TableBody>
+            {filteredTransactions.length === 0 && (
+              <TableRow>
+                <TableCell
+                  colSpan={7}
+                  className="h-24 text-center text-xl capitalize"
+                >
+                  No hay transacciones
+                </TableCell>
+              </TableRow>
+            )}
             {filteredTransactions.map((transaction) => (
               <TableRow key={transaction._id}>
                 <TableCell>
                   {transaction.date
-                    ? format(new Date(transaction.date), "dd/MM/yyyy")
+                    ? formatLocalDate(transaction.date)
                     : "Fecha no disponible"}
                 </TableCell>
                 <TableCell>
@@ -184,7 +196,7 @@ export default function ListTransactions({
                   </Badge>
                 </TableCell>
                 <TableCell className="font-medium">
-                  S/ {transaction.amount.toFixed(2)}
+                  {currencyFormatter.format(transaction.amount)}
                 </TableCell>
                 <TableCell>{transaction.category}</TableCell>
                 <TableCell>

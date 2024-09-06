@@ -1,3 +1,4 @@
+import { CardComponent } from "@/components/CardComponent";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -7,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Table,
   TableHeader,
@@ -17,13 +19,13 @@ import {
 } from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
 import capitalize from "@/utils/capitalize";
-import { formatDate } from "@/utils/formattedDate";
+import { currencyFormatter } from "@/utils/CurrencyFormatter";
+import { formatLocalDate } from "@/utils/formatDate";
 import { calculateSimulatorData } from "@/utils/loanSimulator/LoanSimulator";
 import { TrashIcon } from "lucide-react";
 import { useEffect } from "react";
 
 export default function PaymentHistory({ payments, loans, deletePayment }) {
-
   const { toast } = useToast();
 
   useEffect(() => {
@@ -46,14 +48,12 @@ export default function PaymentHistory({ payments, loans, deletePayment }) {
   }, [payments, loans]);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Historial de pago</CardTitle>
-        <CardDescription>
-          Ver el historial de los pagos de su préstamo.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <CardComponent
+      title="Historial de pago"
+      description="Ver el historial de los pagos de su préstamo."
+      className="shadow-lg"
+    >
+      <ScrollArea className="h-[400px]">
         <Table>
           <TableHeader>
             <TableRow>
@@ -69,6 +69,16 @@ export default function PaymentHistory({ payments, loans, deletePayment }) {
             </TableRow>
           </TableHeader>
           <TableBody>
+            {payments.length === 0 && (
+              <TableRow>
+                <TableCell
+                  colSpan={9}
+                  className="text-center text-lg text-muted-foreground"
+                >
+                  No hay pagos registrados
+                </TableCell>
+              </TableRow>
+            )}
             {payments.map((payment, index) => {
               // Encontrar el préstamo correspondiente a este pago
               const loan = loans.find((loan) => loan._id === payment.loanId);
@@ -93,29 +103,40 @@ export default function PaymentHistory({ payments, loans, deletePayment }) {
 
               return (
                 <TableRow key={index}>
-                  <TableCell>{formatDate(loan.date)}</TableCell>
+                  <TableCell>{formatLocalDate(loan.date)}</TableCell>
                   <TableCell>{loanData.borrower}</TableCell>
                   <TableCell className="text-center">
                     {payment.paymentNumber}
                   </TableCell>
-                  <TableCell>S/ {loanData.loanAmount}</TableCell>
-                  <TableCell>S/ {loanData.paymentAmount}</TableCell>
-                  <TableCell>S/ {loanData.remainingAmount}</TableCell>
-                  <TableCell>S/ {loanData.totalAmount}</TableCell>
                   <TableCell>
-                  <div className="relative w-full">
+                    {currencyFormatter.format(loanData.loanAmount)}
+                  </TableCell>
+                  <TableCell>
+                    {currencyFormatter.format(loanData.paymentAmount)}
+                  </TableCell>
+                  <TableCell>
+                    {currencyFormatter.format(loanData.remainingAmount)}
+                  </TableCell>
+                  <TableCell>
+                    {currencyFormatter.format(loanData.totalAmount)}
+                  </TableCell>
+                  <TableCell>
+                    <div className="relative w-full">
                       <Progress value={progress} max={100} />
                       {/* Texto superpuesto */}
-                      <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center text-white text-sm font-semibold"> 
-                      
-                      {/* {progress === 100 ? 'Completado' : ''} */}
-                        {progress}% {/* O puedes poner `S/ {loanData.remainingAmount}` */}
+                      <div className="absolute left-0 top-0 flex h-full w-full items-center justify-center text-sm font-semibold text-white">
+                        {/* {progress === 100 ? 'Completado' : ''} */}
+                        {progress}%{" "}
+                        {/* O puedes poner `S/ {loanData.remainingAmount}` */}
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Button variant="ghost"
-                    size="icon" onClick={() => deletePayment(payment._id)}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => deletePayment(payment._id)}
+                    >
                       <TrashIcon className="h-4 w-4" />
                     </Button>
                   </TableCell>
@@ -124,7 +145,7 @@ export default function PaymentHistory({ payments, loans, deletePayment }) {
             })}
           </TableBody>
         </Table>
-      </CardContent>
-    </Card>
+      </ScrollArea>
+    </CardComponent>
   );
 }

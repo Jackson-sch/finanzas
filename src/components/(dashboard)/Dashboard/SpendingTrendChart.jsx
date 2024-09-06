@@ -12,7 +12,7 @@ import {
 } from "recharts";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
-import { currencyFormatter } from "@/components/CurrencyFormatter";
+import { currencyFormatter } from "@/utils/CurrencyFormatter";
 import capitalize from "@/utils/capitalize";
 
 // Función para transformar las transacciones en egresos e ingresos por mes

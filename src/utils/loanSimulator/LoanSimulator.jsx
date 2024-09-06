@@ -138,7 +138,6 @@ export const calculateSimulatorData = (loanData, paymentNumber = 0) => {
     paymentNumber,
     totalPayments,
   );
-  console.log(remainingAmount);
 
   // Retorna los datos calculados del simulador de préstamos
   return {

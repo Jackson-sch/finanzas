@@ -1,4 +1,4 @@
-import React from "react";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { format, parseISO } from "date-fns";
@@ -33,13 +33,15 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-export default function TransactionForm({
+export default  function TransactionForm({
   categories,
   tags,
   addTransaction,
   updateTransaction,
   transaction,
+  session,
 }) {
+
   const isEditing = !!transaction; // Verifica si se está editando una transacción
 
   const form = useForm({
@@ -50,13 +52,17 @@ export default function TransactionForm({
       category: transaction?.category || "",
       tags: transaction?.tags || [],
       description: transaction?.description || "",
-      date: transaction?.date ? new Date(transaction.date).toISOString() : new Date().toISOString(),
+      date: transaction?.date
+        ? new Date(transaction.date).toISOString()
+        : new Date().toISOString(),
+      email: session?.user?.email || "",
     },
   });
 
   const handleSubmitForm = async (data) => {
     data.amount = parseFloat(data.amount); // Asegúrate de que el monto sea un número
     data.date = new Date(data.date).toISOString(); // Asegúrate de que la fecha esté en formato ISO
+    data.email = session.user.email; // Agrega el ID del usuario a la transacción
 
     if (isEditing) {
       await updateTransaction(transaction._id, data);
@@ -65,6 +71,7 @@ export default function TransactionForm({
     }
     form.reset();
   };
+
 
   return (
     <CardComponent
@@ -159,6 +166,7 @@ export default function TransactionForm({
                             date > new Date() || date < new Date("2024-01-01")
                           }
                           initialFocus
+                          locale={es}
                         />
                       </PopoverContent>
                     </Popover>

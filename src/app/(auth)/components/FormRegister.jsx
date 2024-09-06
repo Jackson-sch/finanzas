@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { registerSchema } from "@/lib/zod";
 import { useState, useTransition } from "react";
-import { registerActions } from "@/action/User";
+import { registerActions } from "@/action/auth-action";
 
 export default function FormRegister() {
   const [error, setError] = useState(null);
@@ -37,36 +37,38 @@ export default function FormRegister() {
     },
   });
 
-  const handleSubmit = async (formData) => {
-    setError(null);
-    startTransition(async () => {
-      try {
-        const response = await registerActions(formData);
-        if (response.error) {
-          setError(response.error);
-          toast({
-            title: "Error",
-            description: response.error,
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Registro exitoso",
-            description: "Su cuenta ha sido creada exitosamente.",
-            duration: 3000,
-          });
-          router.push("/dashboard");
-        }
-      } catch (error) {
-        setError(error.message);
+ // Dentro de handleSubmit en FormRegister
+
+const handleSubmit = async (formData) => {
+  setError(null);
+  startTransition(async () => {
+    try {
+      const response = await registerActions(formData);
+      if (response.error) {
+        setError(response.error);
         toast({
           title: "Error",
-          description: error.message,
+          description: response.error,
           variant: "destructive",
         });
+      } else {
+        toast({
+          title: "Registro exitoso",
+          description: response.message, // Mensaje adecuado
+          duration: 3000,
+        });
+        router.push("/login"); // Redirigir al login para que el usuario confirme su correo
       }
-    });
-  };
+    } catch (error) {
+      setError(error.message);
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+};
 
   return (
     <Form {...form}>
@@ -134,7 +136,9 @@ export default function FormRegister() {
           />
         </div>
 
-        <Button type="submit">Sign up</Button>
+        <Button type="submit" disabled={isPending}>
+          {isPending ? "Registrando..." : "Registrar"}
+        </Button>
 
         <p className="text-center text-sm text-gray-500">
           Already have an account?{" "}

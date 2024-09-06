@@ -1,57 +1,70 @@
-/**
- * El componente de la función 'Prestamos' gestiona el registro de préstamos, la simulación y la visualización dentro de un préstamo
-* Sistema de gestión en una aplicación React.
-* @returns El componente `prestamos` se está devueltos.Es un componente funcional que gestiona el préstamo
-* Datos e incluye un formulario para registrar nuevos préstamos, un simulador de préstamos y una lista de préstamos existentes.
-* El componente obtiene datos de préstamos sobre el montaje utilizando `UseEffect` y maneja el registro de préstamos y
-* Cálculos del simulador a través de varias funciones.La estructura del componente incluye un encabezado para préstamo
-* Gestión, una sección principal con un formulario
- */
+"use client";
+
 import { useEffect, useState } from "react";
-import { Separator } from "@/components/ui/separator";
-import RegisterForm from "./(Prestamos)/RegisterForm";
-import DetailsLoan from "./(Prestamos)/DetailsLoan";
+
 import { fetchLoans } from "@/utils/fetchingData";
 import { calculateSimulatorData } from "@/utils/loanSimulator/LoanSimulator";
-import { useToast } from "@/components/ui/use-toast";
-import ListLoans from "./(Prestamos)/ListLoans";
 
-export default function Prestamos() {
+import ListLoans from "./ListLoans";
+import { toast } from "@/components/ui/use-toast";
+import RegisterForm from "./LoanForm";
+import DetailsLoan from "./DetailsLoan";
+
+export default function Prestamos({ session }) {
   const [loans, setLoans] = useState([]);
   const [simulatorData, setSimulatorData] = useState(null);
-  const { toast } = useToast();
 
-  const handleSubmit = async (data) => {
+  const handleApiRequest = async (url, method, data = null) => {
+    const options = {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+    if (data) options.body = JSON.stringify(data);
+
+    const response = await fetch(url, options);
+
+    if (!response.ok) throw new Error("Error en la respuesta de la API");
+    return response.json();
+  };
+
+  const handleLoan = async (
+    method,
+    url,
+    data = null,
+    successTitle,
+    successDescription,
+  ) => {
     try {
-      // Maneja la creación de nuevos préstamos
-      const response = await fetch("/api/loans", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
+      const loan = await handleApiRequest(url, method, data);
+      toast({
+        title: successTitle,
+        description: successDescription,
+        status: "success",
       });
-      if (response.ok) {
-        toast({
-          title: "Préstamo registrado",
-          description: "El préstamo ha sido registrado exitosamente",
-          status: "success",
-        });
-        setLoans([...loans, data]);
-      } else {
-        toast({
-          title: "Error",
-          description: "Ocurrió un error al registrar el préstamo",
-          status: "error",
-        });
-      }
+      return loan;
     } catch (error) {
       console.error("Error al registrar el préstamo:", error.message);
       toast({
-        title: "Error",
-        description: "Ocurrió un error al registrar el préstamo",
+        title: "Error en la respuesta de la API",
+        description:
+          "Ocurrió un error al registrar el préstamo" + error.message,
         status: "error",
       });
+    }
+  };
+
+  const handleSubmit = async (data) => {
+    const loan = await handleLoan(
+      "POST",
+      "/api/loans",
+      data,
+      "Préstamo registrado",
+      "El préstamo ha sido registrado exitosamente",
+    );
+    if (loan) {
+      setLoans([...loans, loan]);
     }
   };
 
@@ -59,13 +72,15 @@ export default function Prestamos() {
     const fetchData = async () => {
       try {
         const loansData = await fetchLoans();
-        setLoans(loansData);
+        // Filtra los prestamos por usuario actual por su campo email
+        const loansDataFiltered = loansData.filter((loan) => loan.email === session?.user?.email);
+        setLoans(loansDataFiltered);
       } catch (error) {
         console.error("Error al obtener los préstamos:", error.message);
       }
     };
     fetchData();
-  }, []);
+  }, [session?.user?.email]);
 
   const handleSimulator = (formValues) => {
     try {
@@ -79,19 +94,39 @@ export default function Prestamos() {
     }
   };
 
+  // Función para eliminar un préstamo
+  const deleteLoan = async (id) => {
+    const success = await handleLoan(
+      "DELETE",
+      `/api/loans/${id}`,
+      null,
+      "Préstamo eliminado",
+      "El prestatario ha sido eliminado exitosamente",
+    )
+
+    if (success) {
+      const updatedLoans = loans.filter((loan) => loan._id !== id);
+      setLoans(updatedLoans);
+    }
+  };
+
   return (
-    <div className="flex h-screen flex-col">
+    <div className="mx-auto space-y-8">
       <header className="flex items-center justify-between rounded-md bg-primary px-6 py-4 text-primary-foreground">
         <h1 className="text-2xl font-bold">Gestión de préstamos</h1>
       </header>
-      <main className="flex-1 pt-6 gap-4 ">
+      <main className="flex-1 gap-4">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <RegisterForm onSubmit={handleSubmit} onSimulator={handleSimulator} />
+          <RegisterForm
+            onSubmit={handleSubmit}
+            onSimulator={handleSimulator}
+            session={session}
+          />
           <DetailsLoan simulatorData={simulatorData} />
         </div>
 
         <div className="mb-5 mt-6">
-          <ListLoans loans={loans} />
+          <ListLoans loans={loans} deleteLoan={deleteLoan} />
         </div>
       </main>
     </div>

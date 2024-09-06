@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CalendarIcon } from "lucide-react"; // Import CalendarIcon for better UI
+import { currencyFormatter } from "@/utils/CurrencyFormatter";
 
 const calculatePercentageChange = (current, previous) => {
   if (previous === 0) return current > 0 ? 100 : 0;
@@ -101,7 +102,7 @@ export default function FinancialSummary({
 const SummaryCard = ({ title, amount, change, color }) => (
   <CardComponent title={title} description={title}>
     <p className={`text-3xl font-bold text-${color}-600`}>
-      S/ {amount.toFixed(2)}
+      {currencyFormatter.format(amount)}
     </p>
     <PercentageIndicator value={change} />
   </CardComponent>

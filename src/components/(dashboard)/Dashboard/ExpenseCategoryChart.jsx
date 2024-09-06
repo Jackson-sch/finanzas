@@ -1,6 +1,5 @@
 import { CardComponent } from "@/components/CardComponent";
-import { currencyFormatter } from "@/components/CurrencyFormatter";
-import React from "react";
+import { currencyFormatter } from "@/utils/CurrencyFormatter"; 
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
 // Función para agrupar transacciones por categoría solo de egresos
@@ -9,7 +8,7 @@ const groupTransactionsByCategory = (transactions) => {
 
   transactions.forEach((transaction) => {
     const { category, amount } = transaction;
-    // Si la categoría ya existe en groupedData, suma el amount, si no, inicialízalo
+    // Si la categoría ya existe en groupedData, suma el amount, si no, inicializar
     if (groupedData[category]) {
       groupedData[category] += amount;
     } else {
@@ -37,7 +36,7 @@ export default function ExpenseCategoryChart({ transactions, COLORS }) {
     <CardComponent
       title="Gastos por Categoría"
       description="Distribución de gastos por categoría"
-      className="shadow-lg"
+      className="shadow-lg h-full"
     >
       <ResponsiveContainer width="100%" height={200}>
         <PieChart>

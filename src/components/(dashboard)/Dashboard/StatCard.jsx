@@ -1,4 +1,4 @@
-import { currencyFormatter } from "@/components/CurrencyFormatter";
+import { currencyFormatter } from "@/utils/CurrencyFormatter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import React from "react";
 

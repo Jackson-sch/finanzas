@@ -1,15 +1,20 @@
-"use client";
+import { auth } from "@/auth";
 import Prestamos from "@/components/(dashboard)/Prestamos/Prestamos";
 
-function App() {
- 
+import React from "react";
+
+export default async function LoansPage() {
+  const session = await auth();
+
+  if (!session) {
+    return <div>Not logged in</div>;
+  }
+
   return (
-    <div className="min-h-screen ">
-      <div className="mx-auto ">
-        <Prestamos />
+    <div className="min-h-screen p-6">
+      <div className="mx-auto">
+        <Prestamos session={session} />
       </div>
     </div>
   );
 }
-
-export default App;

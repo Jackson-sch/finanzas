@@ -10,7 +10,7 @@ import {
   User,
   Clock,
 } from "lucide-react";
-import { currencyFormatter } from "@/components/CurrencyFormatter";
+import { currencyFormatter } from "@/utils/CurrencyFormatter";
 
 export default function DetailsLoan({ simulatorData }) {
   if (!simulatorData) {

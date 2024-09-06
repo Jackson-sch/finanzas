@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/table";
 import React from "react";
 
-export default function page() {
+export default function SettingsPage() {
   return (
     <div className="container mx-auto p-4">
       <h1>Users</h1>

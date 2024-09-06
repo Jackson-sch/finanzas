@@ -1,12 +1,16 @@
-"use client";
-import TransactionV2 from "@/components/(dashboard)/Transaction/TransactionV2";
-import React from "react";
+import { auth } from "@/auth";
+import Transaction from "@/components/(dashboard)/Transaction/Transaction";
 
-export default function page() {
+export default async function TransactionPage() {
+  const session = await auth();
+
+  if (!session) {
+    return <div>Not logged in</div>;
+  }
   return (
     <div className="min-h-screen p-6">
       <div className="mx-auto">
-        <TransactionV2 />
+        <Transaction session={session} />
       </div>
     </div>
   );

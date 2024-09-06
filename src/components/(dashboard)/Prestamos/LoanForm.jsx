@@ -31,11 +31,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { CalendarDaysIcon } from "lucide-react";
-import { CardComponent } from "../../../CardComponent";
+import { CardComponent } from "@/components/CardComponent"; 
 import { loanSchema } from "@/lib/validaciones/loan/loan";
 import { toast } from "@/components/ui/use-toast";
 
-export default function RegisterForm({ onSubmit, onSimulator }) {
+export default function RegisterForm({ onSubmit, onSimulator, session }) {
   const form = useForm({
     resolver: zodResolver(loanSchema),
     defaultValues: {
@@ -47,6 +47,7 @@ export default function RegisterForm({ onSubmit, onSimulator }) {
       durationMonths: "",
       date: "",
       paymentFrequency: "",
+      email: session?.user?.email || "",
     },
   });
 
@@ -60,6 +61,10 @@ export default function RegisterForm({ onSubmit, onSimulator }) {
       // Asegurarse de que la fecha esté en formato ISO
       if (data.date) {
         data.date = new Date(data.date).toISOString();
+      }
+
+      if (data.email) {
+        data.email = session.user.email;
       }
       await onSubmit(data);
       form.reset();
@@ -253,6 +258,7 @@ export default function RegisterForm({ onSubmit, onSimulator }) {
                             date > new Date() || date < new Date("1900-01-01")
                           }
                           initialFocus
+                          locale={es}
                         />
                       </PopoverContent>
                     </Popover>
