@@ -1,7 +1,7 @@
 import Navbar from "@/components/(home)/Navbar/Navbar";
 import React from "react";
 
-export default function page() {
+export default function Homepage() {
   return (
     <div className="min-h-screen min-w-full">
       <Navbar />
