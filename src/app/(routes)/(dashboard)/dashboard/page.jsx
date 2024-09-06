@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
-import DashboardPage from "@/components/(dashboard)/Dashboard/Dashboard";
+import Dashboard from "@/components/(dashboard)/Dashboard/Dashboard";
 
-export default async function Dashboard() {
+export default async function DashboardPage() {
   const session = await auth();
 
   if (!session) {
@@ -11,7 +11,7 @@ export default async function Dashboard() {
   return (
     <div className="flex min-h-screen">
       <div className="flex-1">
-        <DashboardPage session={session} />
+        <Dashboard session={session} />
       </div>
     </div>
   );

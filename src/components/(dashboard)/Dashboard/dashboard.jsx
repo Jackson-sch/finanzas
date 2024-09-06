@@ -25,7 +25,7 @@ import {
   calculateTotal,
 } from "@/utils/auxiliaryFunctions";
 
-export default function DashboardPage({ session }) {
+export default function Dashboard({ session }) {
   const [loans, setLoans] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [balanceTotal, setBalanceTotal] = useState(0);
