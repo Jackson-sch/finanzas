@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import Payments from "@/components/(dashboard)/Payments/payments";
+import Payments from "@/components/(dashboard)/Payments/Payments";
 
 export default async function PaymentsPage() {
   const session = await auth();

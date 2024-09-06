@@ -1,5 +1,9 @@
+import dynamic from "next/dynamic";
+
 import { auth } from "@/auth";
-import Dashboard from "@/components/(dashboard)/Dashboard/Dashboard";
+const Dashboard = dynamic(
+  () => import("@/components/(dashboard)/Dashboard/Dashboard"),
+);
 
 export default async function DashboardPage() {
   const session = await auth();
