@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TransactionForm from "./TransactionForm";
@@ -19,7 +19,7 @@ export default function Transaction({ session }) {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [categories, setCategories] = useState([]);
   const [tags, setTags] = useState([]);
-  const [summaryPeriod, setSummaryPeriod] = useState("mensual");
+  const [summaryPeriod, setSummaryPeriod] = useState("anual");
   const [summary, setSummary] = useState({
     ingresos: 0,
     egresos: 0,
@@ -95,10 +95,9 @@ export default function Transaction({ session }) {
     );
 
     if (transaction) {
-      /* const updatedTransactions = transactions.map((t) =>
+      const updatedTransactions = transactions.map((t) =>
         t._id === id ? transaction : t,
-      ); */
-      const updatedTransactions = [...transactions, transaction];
+      );
       setTransactions(updatedTransactions);
       updateSummary(updatedTransactions);
     }
@@ -178,7 +177,7 @@ export default function Transaction({ session }) {
     }
   };
 
-  const updateSummary = (transactions) => {
+  const updateSummary = useCallback((transactions) => {
     const summary = transactions.reduce(
       (acc, transaction) => {
         if (transaction.type === "ingreso") {
@@ -193,17 +192,19 @@ export default function Transaction({ session }) {
 
     summary.balance = summary.ingresos - summary.egresos;
     setSummary(summary);
-  };
-  // Función para obtener datos en función del período
-  const fetchDataForPeriod = async (period) => {
-    let filteredTransactions = transactions;
+    fetchDataForPeriod(summaryPeriod, transactions); // Actualizar resumen para el período actual
+  }, [summaryPeriod, fetchDataForPeriod]);
 
+
+  // Función para obtener datos en función del período
+  const fetchDataForPeriod = useCallback(async (period) => {
+    let filteredTransactions = transactions;
+    const today = new Date();
     // Filtrar transacciones según el período seleccionado
     switch (period) {
       case "diario":
         filteredTransactions = transactions.filter((transaction) => {
           // Lógica para filtrar las transacciones del día actual
-          const today = new Date();
           const transactionDate = new Date(transaction.date);
           return transactionDate.toDateString() === today.toDateString();
         });
@@ -260,7 +261,7 @@ export default function Transaction({ session }) {
     // Aquí puedes adaptar la lógica para calcular el resumen del período anterior según el tipo de período seleccionado
     const previousSummary = calculatePreviousSummary(transactions, period);
     setPreviousSummary(previousSummary);
-  };
+  }, [transactions]);
 
   const calculatePreviousSummary = (transactions, period) => {
     const currentDate = new Date();
@@ -321,7 +322,7 @@ export default function Transaction({ session }) {
         );
         setTransactions(filteredTransactions);
         updateSummary(filteredTransactions);
-        calculatePreviousSummary(filteredTransactions);
+        /* calculatePreviousSummary(filteredTransactions); */
 
         if (summaryPeriod) {
           fetchDataForPeriod(summaryPeriod); // Inicializar datos con el período seleccionado
@@ -345,14 +346,18 @@ export default function Transaction({ session }) {
     };
 
     fetchData();
-  }, [summaryPeriod, session?.user?.email]);
+  }, [session?.user?.email, updateSummary, summaryPeriod, fetchDataForPeriod]);
+
+  useEffect(() => {
+    if (summaryPeriod) {
+      fetchDataForPeriod(summaryPeriod, transactions);
+    }
+  }, [summaryPeriod, transactions, fetchDataForPeriod, updateSummary]);
 
   return (
     <div className="mx-auto space-y-8">
       <header className="flex items-center justify-between rounded-md bg-primary px-6 py-4 text-primary-foreground">
-        <h1 className="text-2xl font-bold">
-          Gestión de Ingresos y Egresos
-        </h1>
+        <h1 className="text-2xl font-bold">Gestión de Ingresos y Egresos</h1>
       </header>
 
       <FinancialSummary

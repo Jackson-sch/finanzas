@@ -31,28 +31,24 @@ export default function FinancialSummary({
   summary,
   setSummaryPeriod,
   previousSummary,
-  fetchDataForPeriod
+  fetchDataForPeriod,
+  summaryPeriod,
 }) {
-  const [localPeriod, setLocalPeriod] = useState("mensual");
 
-  const handleChange = (value) => {
-    setLocalPeriod(value);
-    setSummaryPeriod(value); // Actualizar el período en el componente padre
-    fetchDataForPeriod(value); // Llamar a la función para actualizar datos
-  };
 
   const ingresosChange = calculatePercentageChange(
-    summary.ingresos,
-    previousSummary.ingresos
+    summary?.ingresos || 0,
+    previousSummary?.ingresos || 0
   );
   const egresosChange = calculatePercentageChange(
-    summary.egresos,
-    previousSummary.egresos
+    summary?.egresos || 0,
+    previousSummary?.egresos || 0
   );
   const balanceChange = calculatePercentageChange(
-    summary.balance,
-    previousSummary.balance
+    summary?.balance || 0,
+    previousSummary?.balance || 0
   );
+  
 
   return (
     <CardComponent
@@ -62,7 +58,10 @@ export default function FinancialSummary({
     >
       <div className="mb-6 flex justify-between items-center">
         <h2 className="text-2xl font-bold">Período actual</h2>
-        <Select onValueChange={(value) => handleChange(value)}>
+        <Select value={summaryPeriod} onValueChange={(value) => {
+            setSummaryPeriod(value);
+            fetchDataForPeriod(value);
+          }}>
           <SelectTrigger className="w-[180px]">
             <CalendarIcon className="mr-2 h-4 w-4" />
             <SelectValue placeholder="Seleccionar período" />
@@ -78,21 +77,21 @@ export default function FinancialSummary({
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <SummaryCard
           title="Ingresos"
-          amount={summary.ingresos}
+          amount={summary?.ingresos || 0}
           change={ingresosChange}
           color="green"
         />
         <SummaryCard
           title="Egresos"
-          amount={summary.egresos}
+          amount={summary?.egresos || 0}
           change={egresosChange}
           color="red"
         />
         <SummaryCard
           title="Balance"
-          amount={summary.balance}
+          amount={summary?.balance || 0}
           change={balanceChange}
-          color={summary.balance >= 0 ? "green" : "red"}
+          color={summary?.balance >= 0 ? "green" : "red"}
         />
       </div>
     </CardComponent>

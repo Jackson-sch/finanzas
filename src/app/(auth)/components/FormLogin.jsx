@@ -85,7 +85,7 @@ export default function FormLogin({ isVerified, OAuthAccountNotLinked }) {
                   <FormControl>
                     <Input
                       type="email"
-                      placeholder="shadcn@example.com"
+                      placeholder="example@example.com"
                       {...field}
                     />
                   </FormControl>
@@ -121,9 +121,9 @@ export default function FormLogin({ isVerified, OAuthAccountNotLinked }) {
           </Button>
 
           <p className="text-center text-sm text-gray-500">
-            Don't have an account?{" "}
+            ¿No tienes una cuenta?{" "}
             <Link href="/register" className="hover:text-brand underline">
-              Register
+              Registrar
             </Link>
           </p>
 

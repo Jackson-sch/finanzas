@@ -45,7 +45,7 @@ export default function PaymentHistory({ payments, loans, deletePayment }) {
         }
       }
     });
-  }, [payments, loans]);
+  }, [payments, loans, toast]);
 
   return (
     <CardComponent

@@ -9,6 +9,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
 import { CartesianGrid, XAxis, Bar, BarChart, Line, LineChart } from "recharts"
 import { ChartTooltipContent, ChartTooltip, ChartContainer } from "@/components/ui/chart"
+import Image from "next/image"
 
 export default function Reportes() {
   return (
@@ -23,7 +24,7 @@ export default function Reportes() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full">
-                  <img
+                  <Image
                     src="/placeholder.svg"
                     width={32}
                     height={32}

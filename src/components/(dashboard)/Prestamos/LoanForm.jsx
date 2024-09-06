@@ -31,7 +31,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { CalendarDaysIcon } from "lucide-react";
-import { CardComponent } from "@/components/CardComponent"; 
+import { CardComponent } from "@/components/CardComponent";
 import { loanSchema } from "@/lib/validaciones/loan/loan";
 import { toast } from "@/components/ui/use-toast";
 
@@ -98,7 +98,7 @@ export default function RegisterForm({ onSubmit, onSimulator, session }) {
         setValue("durationMonths", newDurationMonths);
       }
     }
-  }, [durationYear, setValue]);
+  }, [durationYear, durationMonth, setValue]);
 
   return (
     <CardComponent

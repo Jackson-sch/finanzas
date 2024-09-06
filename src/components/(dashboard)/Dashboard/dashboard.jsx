@@ -122,7 +122,7 @@ export default function DashboardPage({ session }) {
     };
 
     fetchData();
-  }, []);
+  }, [session.user.email]);
 
   return (
     <div className="flex-col md:flex">

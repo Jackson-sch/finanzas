@@ -37,7 +37,7 @@ export default function Payments({ session }) {
       }
     };
     fetchData();
-  }, [session]);
+  }, [session, toast]);
 
   const handleSubmitPayment = async (data) => {
     try {
