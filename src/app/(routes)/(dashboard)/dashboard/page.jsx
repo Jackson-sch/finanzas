@@ -1,9 +1,5 @@
-import dynamic from "next/dynamic";
-
 import { auth } from "@/auth";
-const Dashboard = dynamic(
-  () => import("@/components/(dashboard)/Dashboard/Dashboard"),
-);
+import PanelDashboard from "@/components/(dashboard)/Dashboard/PanelDashboard";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -15,7 +11,7 @@ export default async function DashboardPage() {
   return (
     <div className="flex min-h-screen">
       <div className="flex-1">
-        <Dashboard session={session} />
+        <PanelDashboard session={session} />
       </div>
     </div>
   );
