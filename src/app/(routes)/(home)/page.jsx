@@ -1,4 +1,4 @@
-import Navbar from "@/components/(home)/Navbar/Navbar";
+import Navbar from "@/components/Home/Navbar/Navbar";
 import React from "react";
 
 export default function Homepage() {
