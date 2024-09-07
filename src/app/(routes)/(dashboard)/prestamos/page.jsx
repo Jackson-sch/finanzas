@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import Prestamos from "@components/Dashboard/Prestamos/Prestamos";
+import Prestamos from "@components/Prestamos/Prestamos";
 
 export default async function LoansPage() {
   const session = await auth();

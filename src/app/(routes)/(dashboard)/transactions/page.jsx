@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import Transaction from "@components/Dashboard/Transaction/Transaction";
+import Transaction from "@components/Transaction/Transaction";
 
 export default async function TransactionPage() {
   const session = await auth();

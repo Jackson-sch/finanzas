@@ -1,4 +1,4 @@
-import Reportes from "@/components/Dashboard/Reportes/Reportes";
+import Reportes from "@components/Reportes/Reportes";
 
 export default function ReportesPage() {
   return (
