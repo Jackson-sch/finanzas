@@ -25,7 +25,7 @@ import {
   calculateTotal,
 } from "@/utils/auxiliaryFunctions";
 
-export default function PanelDashboard() {
+export default function PanelDashboard({ session }) {
   const [loans, setLoans] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [balanceTotal, setBalanceTotal] = useState(0);
@@ -122,7 +122,7 @@ export default function PanelDashboard() {
     };
 
     fetchData();
-  }, [session.user.email]);
+  }, [session?.user?.email]);
 
   return (
     <div className="flex-col md:flex">
