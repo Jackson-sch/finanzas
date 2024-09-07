@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { MountainIcon } from "lucide-react";
 
-export default function Navbar() {
+export default function NavbarHome() {
 
 
   return (

@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
-import PanelDashboard from "./PanelDashboard";
+import PanelDashboard from "@/components/Dashboard/PanelDashboard";
+
 
 
 export default async function DashboardPage() {
