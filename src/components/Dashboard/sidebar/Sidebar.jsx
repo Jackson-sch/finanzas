@@ -1,4 +1,4 @@
-import SidebarRoutes from "./SidebarRoutes/SidebarRoutes";
+import SidebarRoutes from "./SidebarRoutes";
 
 export default function Sidebar() {
   return (

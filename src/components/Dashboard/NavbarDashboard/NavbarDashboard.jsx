@@ -1,9 +1,10 @@
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import React from "react";
 import { Menu } from "lucide-react";
-import SidebarRoutes from "../Sidebar/SidebarRoutes/SidebarRoutes";
+
 import LogoutButton from "@/app/(auth)/components/LogoutButton";
 import { DropdownProfile } from "./DropdownProfile";
+import SidebarRoutes from "../Sidebar/SidebarRoutes";
 
 export default function NavbarDashboard() {
   return (

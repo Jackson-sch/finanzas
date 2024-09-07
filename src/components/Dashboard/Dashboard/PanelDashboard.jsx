@@ -12,14 +12,14 @@ import {
   TrendingDownIcon,
 } from "lucide-react";
 import { fetchLoans, fetchTransactions } from "@/utils/fetchingData";
-import CurrentLoans from "@components/Dashboard/CurrentLoans";
-import LatestTransactions from "@components/Dashboard/LatestTransactions";
-import ExpenseCategoryChart from "@components/Dashboard/ExpenseCategoryChart";
+import CurrentLoans from "@/components/dashboard/Dashboard/CurrentLoans";
+import LatestTransactions from "@/components/dashboard/Dashboard/LatestTransactions";
+import ExpenseCategoryChart from "@/components/dashboard/Dashboard/ExpenseCategoryChart";
 import { COLORS } from "@/components/Colors";
-import SpendingTrendChart from "@components/Dashboard/SpendingTrendChart";
-import IncomeAndExpenseChart from "@components/Dashboard/IncomeAndExpenseChart";
+import SpendingTrendChart from "@/components/dashboard/Dashboard/SpendingTrendChart";
+import IncomeAndExpenseChart from "@/components/dashboard/Dashboard/IncomeAndExpenseChart";
 import { currencyFormatter } from "@/utils/CurrencyFormatter";
-import StatCard from "@components/Dashboard/StatCard";
+import StatCard from "@/components/dashboard/Dashboard/StatCard";
 import {
   calculatePercentageChange,
   calculateTotal,
@@ -40,14 +40,16 @@ export default function PanelDashboard({ session }) {
       try {
         const loansData = await fetchLoans();
         // filtrar solo prestamos que corresponden al usuario logueado en la sesión campo a comparar email
-        const loansDataFiltered = loansData.filter((loan) => loan.email === session.user.email);
+        const loansDataFiltered = loansData.filter(
+          (loan) => loan.email === session.user.email,
+        );
         setLoans(loansDataFiltered);
 
         const transactionsData = await fetchTransactions();
         // Filtra todas las transacciones del mismo usuario que ah iniciado sesión la validación sera a del email si ambos coinciden me los muestras
         const filteredTransactions = transactionsData.filter(
-          (transaction) => transaction.email === session.user.email
-        )
+          (transaction) => transaction.email === session.user.email,
+        );
         setTransactions(filteredTransactions);
 
         // Calcular ingresos y egresos totales de todas las transacciones
@@ -60,11 +62,12 @@ export default function PanelDashboard({ session }) {
         const thirtyDaysAgo = subDays(now, 30);
         const sixtyDaysAgo = subDays(now, 60);
 
-        const last30DaysTransactions = filteredTransactions.filter((transaction) =>
-          isWithinInterval(new Date(transaction.date), {
-            start: thirtyDaysAgo,
-            end: now,
-          }),
+        const last30DaysTransactions = filteredTransactions.filter(
+          (transaction) =>
+            isWithinInterval(new Date(transaction.date), {
+              start: thirtyDaysAgo,
+              end: now,
+            }),
         );
 
         const previous30DaysTransactions = filteredTransactions.filter(

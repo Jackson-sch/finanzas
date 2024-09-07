@@ -1,6 +1,6 @@
-import { Calendar, DollarSign, Grip, HandCoins, SquareGanttChart, SquareKanban, Wallet } from "lucide-react";
+import { DollarSign, Grip, HandCoins, SquareKanban, Wallet } from "lucide-react";
 
-export const dataGeneralSidebar = [
+export const DataGeneralSidebar = [
   {
     icon: Grip,
     label: "Dashboard",
@@ -28,7 +28,7 @@ export const dataGeneralSidebar = [
   },
 ];
 
-export const dataAdminSidebar = [
+/* export const dataAdminSidebar = [
   {
     icon: SquareGanttChart,
     label: "Manage your cars",
@@ -40,3 +40,4 @@ export const dataAdminSidebar = [
     href: "/dashboard/admin/reserves-admin",
   },
 ];
+ */
