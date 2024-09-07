@@ -1,4 +1,4 @@
-import { connect, connection } from "mongoose";
+import { connect } from "mongoose";
 
 const conn = {
   isConnected: false,
@@ -10,7 +10,7 @@ export async function dbConnect() {
     return;
   }
   const db = await connect(process.env.MONGODB_URI);
-  console.log("🚀 ~ dbConnect ~ db:", db.connection.db.databaseName)
+  
 
   conn.isConnected = db.connections[0].readyState;
 }

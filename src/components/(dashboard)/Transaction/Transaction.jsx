@@ -177,182 +177,181 @@ export default function Transaction({ session }) {
     }
   };
 
-  const updateSummary = useCallback((transactions) => {
-    const summary = transactions.reduce(
+  const calculateSummary = useCallback((filteredTransactions) => {
+    return filteredTransactions.reduce(
       (acc, transaction) => {
         if (transaction.type === "ingreso") {
           acc.ingresos += transaction.amount;
         } else {
           acc.egresos += transaction.amount;
         }
+        acc.balance = acc.ingresos - acc.egresos;
         return acc;
       },
-      { ingresos: 0, egresos: 0 },
+      { ingresos: 0, egresos: 0, balance: 0 },
     );
+  }, []);
 
-    summary.balance = summary.ingresos - summary.egresos;
-    setSummary(summary);
-    fetchDataForPeriod(summaryPeriod, transactions); // Actualizar resumen para el período actual
-  }, [summaryPeriod]);
+  const filterTransactionsByPeriod = useCallback((transactions, period) => {
+    if (!transactions || !Array.isArray(transactions)) {
+      console.warn("Transactions is undefined or not an array");
+      return [];
+    }
 
-
-  // Función para obtener datos en función del período
-  const fetchDataForPeriod = useCallback(async (period) => {
-    let filteredTransactions = transactions;
     const today = new Date();
-    // Filtrar transacciones según el período seleccionado
     switch (period) {
       case "diario":
-        filteredTransactions = transactions.filter((transaction) => {
-          // Lógica para filtrar las transacciones del día actual
-          const transactionDate = new Date(transaction.date);
-          return transactionDate.toDateString() === today.toDateString();
-        });
-        break;
+        return transactions.filter(
+          (transaction) =>
+            new Date(transaction.date).toDateString() === today.toDateString(),
+        );
       case "semanal":
-        filteredTransactions = transactions.filter((transaction) => {
-          // Lógica para filtrar las transacciones de la semana actual
-          const today = new Date();
-          const transactionDate = new Date(transaction.date);
-          const oneWeekAgo = new Date(today);
-          oneWeekAgo.setDate(today.getDate() - 7);
-          return transactionDate >= oneWeekAgo && transactionDate <= today;
-        });
-        break;
+        const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+        return transactions.filter(
+          (transaction) =>
+            new Date(transaction.date) >= oneWeekAgo &&
+            new Date(transaction.date) <= today,
+        );
       case "mensual":
-        filteredTransactions = transactions.filter((transaction) => {
-          // Lógica para filtrar las transacciones del mes actual
-          const today = new Date();
+        return transactions.filter((transaction) => {
           const transactionDate = new Date(transaction.date);
           return (
             transactionDate.getMonth() === today.getMonth() &&
             transactionDate.getFullYear() === today.getFullYear()
           );
         });
-        break;
       case "anual":
-        filteredTransactions = transactions.filter((transaction) => {
-          // Lógica para filtrar las transacciones del año actual
-          const today = new Date();
-          const transactionDate = new Date(transaction.date);
-          return transactionDate.getFullYear() === today.getFullYear();
-        });
-        break;
-      default:
-        break;
-    }
-
-    // Calcular los resúmenes para el período actual
-    const currentSummary = filteredTransactions.reduce(
-      (acc, transaction) => {
-        if (transaction.type === "ingreso") {
-          acc.ingresos += transaction.amount;
-        } else {
-          acc.egresos += transaction.amount;
-        }
-        return acc;
-      },
-      { ingresos: 0, egresos: 0 },
-    );
-    currentSummary.balance = currentSummary.ingresos - currentSummary.egresos;
-    setSummary(currentSummary);
-
-    // Calcular los resúmenes para el período anterior
-    // Aquí puedes adaptar la lógica para calcular el resumen del período anterior según el tipo de período seleccionado
-    const previousSummary = calculatePreviousSummary(transactions, period);
-    setPreviousSummary(previousSummary);
-  }, [transactions]);
-
-  const calculatePreviousSummary = (transactions, period) => {
-    const currentDate = new Date();
-    let lastPeriodDate;
-
-    // Lógica para determinar la fecha de inicio del período anterior según el tipo de período seleccionado
-    switch (period) {
-      case "diario":
-        lastPeriodDate = new Date(currentDate);
-        lastPeriodDate.setDate(currentDate.getDate() - 1);
-        break;
-      case "semanal":
-        lastPeriodDate = new Date(currentDate);
-        lastPeriodDate.setDate(currentDate.getDate() - 7);
-        break;
-      case "mensual":
-        lastPeriodDate = new Date(
-          currentDate.getFullYear(),
-          currentDate.getMonth() - 1,
-          1,
+        return transactions.filter(
+          (transaction) =>
+            new Date(transaction.date).getFullYear() === today.getFullYear(),
         );
-        break;
-      case "anual":
-        lastPeriodDate = new Date(currentDate.getFullYear() - 1, 0, 1);
-        break;
       default:
-        lastPeriodDate = new Date(currentDate);
+        return transactions;
     }
+  }, []);
 
-    const lastPeriodTransactions = transactions.filter(
-      (transaction) => new Date(transaction.date) < lastPeriodDate,
-    );
+  const calculatePreviousSummary = useCallback(
+    (transactions, period) => {
+      const currentDate = new Date();
+      let lastPeriodDate;
 
-    const previousSummary = lastPeriodTransactions.reduce(
-      (acc, transaction) => {
-        if (transaction.type === "ingreso") {
-          acc.ingresos += transaction.amount;
-        } else {
-          acc.egresos += transaction.amount;
-        }
-        return acc;
-      },
-      { ingresos: 0, egresos: 0 },
-    );
+      switch (period) {
+        case "diario":
+          lastPeriodDate = new Date(
+            currentDate.setDate(currentDate.getDate() - 1),
+          );
+          break;
+        case "semanal":
+          lastPeriodDate = new Date(
+            currentDate.setDate(currentDate.getDate() - 7),
+          );
+          break;
+        case "mensual":
+          lastPeriodDate = new Date(
+            currentDate.setMonth(currentDate.getMonth() - 1),
+          );
+          break;
+        case "anual":
+          lastPeriodDate = new Date(
+            currentDate.setFullYear(currentDate.getFullYear() - 1),
+          );
+          break;
+        default:
+          lastPeriodDate = new Date(currentDate);
+      }
 
-    previousSummary.balance =
-      previousSummary.ingresos - previousSummary.egresos;
-    return previousSummary;
-  };
+      const lastPeriodTransactions = transactions.filter(
+        (transaction) => new Date(transaction.date) < lastPeriodDate,
+      );
+
+      return calculateSummary(lastPeriodTransactions);
+    },
+    [calculateSummary],
+  );
+
+  const fetchDataForPeriod = useCallback(
+    (period, transactionsData) => {
+      if (!transactionsData || !Array.isArray(transactionsData)) {
+        console.warn("TransactionsData is undefined or not an array");
+        setSummary({ ingresos: 0, egresos: 0, balance: 0 });
+        setPreviousSummary({ ingresos: 0, egresos: 0, balance: 0 });
+        return;
+      }
+
+      const filteredTransactions = filterTransactionsByPeriod(
+        transactionsData,
+        period,
+      );
+      const currentSummary = calculateSummary(filteredTransactions);
+      setSummary(currentSummary);
+
+      const previousSummary = calculatePreviousSummary(
+        transactionsData,
+        period,
+      );
+      setPreviousSummary(previousSummary);
+    },
+    [filterTransactionsByPeriod, calculateSummary, calculatePreviousSummary],
+  );
+
+  const updateSummary = useCallback(
+    (transactions) => {
+      const summary = calculateSummary(transactions);
+      setSummary(summary);
+      fetchDataForPeriod(summaryPeriod, transactions);
+    },
+    [summaryPeriod, fetchDataForPeriod, calculateSummary],
+  );
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const transactionsData = await fetchTransactions();
-        // Filtra las transacciones por usuario actual por su campo email
-        const filteredTransactions = transactionsData.filter(
-          (transaction) => transaction.email === session?.user?.email,
-        );
-        setTransactions(filteredTransactions);
-        updateSummary(filteredTransactions);
-        /* calculatePreviousSummary(filteredTransactions); */
+        if (transactionsData && Array.isArray(transactionsData)) {
+          const filteredTransactions = transactionsData.filter(
+            (transaction) => transaction.email === session?.user?.email,
+          );
+          setTransactions(filteredTransactions);
+          updateSummary(filteredTransactions);
 
-        if (summaryPeriod) {
-          fetchDataForPeriod(summaryPeriod); // Inicializar datos con el período seleccionado
+          if (summaryPeriod) {
+            fetchDataForPeriod(summaryPeriod, filteredTransactions);
+          }
+
+          const categoriesData = await fetchCategories();
+          const filteredCategories = categoriesData.filter(
+            (category) =>
+              !category.isUserAdded || category.email === session?.user?.email,
+          );
+          setCategories(filteredCategories);
+  
+          const tagsData = await fetchTags();
+          const filteredTags = tagsData.filter(
+            (tag) => !tag.isUserAdded || tag.email === session?.user?.email,
+          );
+          setTags(filteredTags);
+        } else {
+          console.warn(
+            "Fetched transactions data is undefined or not an array",
+          );
+          setTransactions([]);
         }
 
-        const categoriesData = await fetchCategories();
-        const filteredCategories = categoriesData.filter(
-          (category) =>
-            !category.isUserAdded || category.email === session?.user?.email,
-        );
-        setCategories(filteredCategories);
-
-        const tagsData = await fetchTags();
-        const filteredTags = tagsData.filter(
-          (tag) => !tag.isUserAdded || tag.email === session?.user?.email,
-        );
-        setTags(filteredTags);
+        // ... resto del código para categorías y tags
       } catch (error) {
         console.error("Error al obtener los datos:", error.message);
+        setTransactions([]);
       }
     };
 
     fetchData();
-  }, [session?.user?.email, updateSummary, summaryPeriod, fetchDataForPeriod]);
+  }, [session?.user?.email, updateSummary, fetchDataForPeriod, summaryPeriod]);
 
   useEffect(() => {
-    if (summaryPeriod) {
+    if (summaryPeriod && transactions.length > 0) {
       fetchDataForPeriod(summaryPeriod, transactions);
     }
-  }, [summaryPeriod, transactions, fetchDataForPeriod, updateSummary]);
+  }, [summaryPeriod, transactions, fetchDataForPeriod]);
 
   return (
     <div className="mx-auto space-y-8">
