@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
-import PanelDashboard from "@dashboard/Dashboard/PanelDashboard";
+import PanelDashboard from "@/components/dashboard/Dashboard/PanelDashboard";
+
 
 export default async function DashboardPage() {
   const session = await auth();
