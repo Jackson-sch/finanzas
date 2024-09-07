@@ -193,7 +193,7 @@ export default function Transaction({ session }) {
     summary.balance = summary.ingresos - summary.egresos;
     setSummary(summary);
     fetchDataForPeriod(summaryPeriod, transactions); // Actualizar resumen para el período actual
-  }, [summaryPeriod, fetchDataForPeriod]);
+  }, [summaryPeriod]);
 
 
   // Función para obtener datos en función del período

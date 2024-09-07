@@ -1,8 +1,8 @@
-import { Calendar, Car, ClipboardPen, DollarSign, HandCoins, Heart, SquareGanttChart, SquareKanban, Wallet, Wallet2 } from "lucide-react";
+import { Calendar, DollarSign, Grip, HandCoins, SquareGanttChart, SquareKanban, Wallet } from "lucide-react";
 
 export const dataGeneralSidebar = [
   {
-    icon: Car,
+    icon: Grip,
     label: "Dashboard",
     href: "/dashboard",
   },

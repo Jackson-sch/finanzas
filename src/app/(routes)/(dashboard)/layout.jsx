@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
-import NavbarDashboard from "@/components/(dashboard)/NavbarDashboard/NavbarDashboard";
-import Sidebar from "@/components/(dashboard)/sidebar/Sidebar";
 import { redirect } from "next/navigation";
+import NavbarDashboard from "@components/NavbarDashboard/NavbarDashboard";
+import Sidebar from "@components/sidebar/Sidebar";
 
 export default async function layout({ children }) {
   const session = await auth();
