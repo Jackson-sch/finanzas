@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
-import Prestamos from "@/components/dashboard/Prestamos/Prestamos";
+import Prestamos from "@/components/Prestamos/Prestamos";
+
 
 
 export default async function LoansPage() {

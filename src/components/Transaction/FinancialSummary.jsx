@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { CardComponent } from "../../CardComponent";
+import { CardComponent } from "../CardComponent";
 import {
   Select,
   SelectContent,
@@ -34,21 +34,18 @@ export default function FinancialSummary({
   fetchDataForPeriod,
   summaryPeriod,
 }) {
-
-
   const ingresosChange = calculatePercentageChange(
     summary?.ingresos || 0,
-    previousSummary?.ingresos || 0
+    previousSummary?.ingresos || 0,
   );
   const egresosChange = calculatePercentageChange(
     summary?.egresos || 0,
-    previousSummary?.egresos || 0
+    previousSummary?.egresos || 0,
   );
   const balanceChange = calculatePercentageChange(
     summary?.balance || 0,
-    previousSummary?.balance || 0
+    previousSummary?.balance || 0,
   );
-  
 
   return (
     <CardComponent
@@ -56,12 +53,15 @@ export default function FinancialSummary({
       description="Resumen rápido de los ingresos y egresos"
       className="shadow-lg"
     >
-      <div className="mb-6 flex justify-between items-center">
+      <div className="mb-6 flex items-center justify-between">
         <h2 className="text-2xl font-bold">Período actual</h2>
-        <Select value={summaryPeriod} onValueChange={(value) => {
+        <Select
+          value={summaryPeriod}
+          onValueChange={(value) => {
             setSummaryPeriod(value);
             fetchDataForPeriod(value);
-          }}>
+          }}
+        >
           <SelectTrigger className="w-[180px]">
             <CalendarIcon className="mr-2 h-4 w-4" />
             <SelectValue placeholder="Seleccionar período" />

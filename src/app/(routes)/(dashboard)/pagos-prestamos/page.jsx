@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
-import Payments from "@/components/dashboard/Payments/Payments";
+import Payments from "@/components/Payments/Payments";
+
 
 
 export default async function PaymentsPage() {

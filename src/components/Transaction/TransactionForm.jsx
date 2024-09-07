@@ -1,10 +1,9 @@
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 
-import { CardComponent } from "../../CardComponent";
+import { CardComponent } from "../CardComponent";
 import { Button } from "@/components/ui/button";
 import { CalendarDaysIcon, PlusCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -33,7 +32,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-export default  function TransactionForm({
+export default function TransactionForm({
   categories,
   tags,
   addTransaction,
@@ -41,7 +40,6 @@ export default  function TransactionForm({
   transaction,
   session,
 }) {
-
   const isEditing = !!transaction; // Verifica si se está editando una transacción
 
   const form = useForm({
@@ -71,7 +69,6 @@ export default  function TransactionForm({
     }
     form.reset();
   };
-
 
   return (
     <CardComponent

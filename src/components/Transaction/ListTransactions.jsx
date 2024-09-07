@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { format, isWithinInterval } from "date-fns";
 import { es } from "date-fns/locale";
-import { CardComponent } from "../../CardComponent";
+import { CardComponent } from "../CardComponent";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Table,

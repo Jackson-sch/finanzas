@@ -11,23 +11,18 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import { CardComponent } from "../../CardComponent";
+import { CardComponent } from "../CardComponent";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { Tag } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { categorySchema } from "@/lib/validaciones/category/category";
+import { tagSchema } from "@/lib/validaciones/tags/tags";
 
-export default function Categories({
-  categories,
-  addCategory,
-  deleteCategory,
-  session,
-}) {
-  const [combinedCategories, setCombinedCategories] = useState([]);
+export default function Tags({ tags, addTag, deleteTag, session }) {
+  const [combinedTags, setCombinedTags] = useState([]);
 
   const form = useForm({
-    resolver: zodResolver(categorySchema),
+    resolver: zodResolver(tagSchema),
     defaultValues: {
       name: "",
       email: session?.user?.email || "",
@@ -36,30 +31,27 @@ export default function Categories({
   });
 
   useEffect(() => {
-    // Combina las categorías predeterminadas con las del usuario
-    const defaultCategories = categories.filter(
-      (category) => !category.isUserAdded,
-    );
-    const userCategories = categories.filter(
-      (category) =>
-        category.isUserAdded && category.email === session?.user?.email,
+    // Combina las etiquetas predeterminadas con las del usuario
+    const defaultTags = tags.filter((tag) => !tag.isUserAdded);
+    const userTags = tags.filter(
+      (tag) => tag.isUserAdded && tag.email === session?.user?.email,
     );
 
-    setCombinedCategories([...defaultCategories, ...userCategories]);
-  }, [categories, session]);
+    setCombinedTags([...defaultTags, ...userTags]);
+  }, [tags, session]);
 
   const handleSubmit = async (data) => {
-    // marcar las categorías como agregadas por el usuario
+    // marcar las etiquetas como agregadas por el usuario
     data.email = session?.user?.email;
     data.isUserAdded = true;
-    await addCategory(data);
+    await addTag(data);
     form.reset();
   };
 
   return (
     <CardComponent
-      title="Categorías"
-      description="Administre las categorías de sus transacciones"
+      title="Etiquetas"
+      description="Administre las etiquetas de sus transacciones"
     >
       <div className="mb-4 flex gap-2">
         <Form {...form}>
@@ -73,9 +65,9 @@ export default function Categories({
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Categoría</FormLabel>
+                    <FormLabel>Etiqueta</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Nueva categoría" />
+                      <Input {...field} placeholder="Nueva etiqueta" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -83,26 +75,22 @@ export default function Categories({
               />
             </div>
             <Button type="submit">
-              <PlusCircle className="mr-2 h-4 w-4" /> Agregar
+              <Tag className="mr-2 h-4 w-4" /> Agregar
             </Button>
           </form>
         </Form>
       </div>
       <div className="flex flex-wrap gap-2">
-        {combinedCategories.map((category) => (
-          <Badge
-            key={category._id}
-            variant="secondary"
-            className="px-3 py-1 text-sm"
-          >
-            {category.name}
-            {category.isUserAdded && category.email === session?.user?.email && (
+        {combinedTags.map((tag) => (
+          <Badge key={tag._id} variant="outline" className="px-3 py-1 text-sm">
+            {tag.name}
+            {tag.isUserAdded && tag.email === session?.user?.email && (
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
                 className="ml-1 h-auto p-0 text-xs"
-                onClick={() => deleteCategory(category._id)}
+                onClick={() => deleteTag(tag._id)}
               >
                 ×
               </Button>
