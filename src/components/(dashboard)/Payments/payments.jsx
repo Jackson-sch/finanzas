@@ -1,8 +1,8 @@
 "use client";
+import React, { useEffect, useState } from "react";
 
 import { useToast } from "@/components/ui/use-toast";
 import { fetchLoans, fetchPayments } from "@/utils/fetchingData";
-import React, { useEffect, useState } from "react";
 import PaymentsLoad from "./PaymentsLoad";
 import PaymentHistory from "./PaymentHistory";
 
