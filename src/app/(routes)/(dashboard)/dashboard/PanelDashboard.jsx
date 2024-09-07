@@ -12,14 +12,14 @@ import {
   TrendingDownIcon,
 } from "lucide-react";
 import { fetchLoans, fetchTransactions } from "@/utils/fetchingData";
-import CurrentLoans from "@/components/dashboard/Dashboard/CurrentLoans";
-import LatestTransactions from "@/components/dashboard/Dashboard/LatestTransactions";
-import ExpenseCategoryChart from "@/components/dashboard/Dashboard/ExpenseCategoryChart";
+import CurrentLoans from "@/components/Dashboard/CurrentLoans";
+import LatestTransactions from "@/components/Dashboard/LatestTransactions";
+import ExpenseCategoryChart from "@/components/Dashboard/ExpenseCategoryChart";
 import { COLORS } from "@/components/Colors";
-import SpendingTrendChart from "@/components/dashboard/Dashboard/SpendingTrendChart";
-import IncomeAndExpenseChart from "@/components/dashboard/Dashboard/IncomeAndExpenseChart";
+import SpendingTrendChart from "@/components/Dashboard/SpendingTrendChart";
+import IncomeAndExpenseChart from "@/components/Dashboard/IncomeAndExpenseChart";
 import { currencyFormatter } from "@/utils/CurrencyFormatter";
-import StatCard from "@/components/dashboard/Dashboard/StatCard";
+import StatCard from "@/components/Dashboard/StatCard";
 import {
   calculatePercentageChange,
   calculateTotal,
