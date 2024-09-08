@@ -1,3 +1,4 @@
+// src/auth.jsx
 import NextAuth from "next-auth";
 import authConfig from "./auth.config";
 
@@ -10,7 +11,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     async session({ session, token }) {
-      if (token) {
+      if (token?.sub && token?.role) {
         session.user.id = token.sub;
         session.user.role = token.role;
         session.user.firstName = token.firstName;
@@ -26,6 +27,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.sub = user.id;
       }
       return token;
+    },
+  },
+  events: {
+    async linkAccount({ user }) {
+      try {
+        const res = await fetch("/api/auth/link-account", {
+          method: "POST",
+          body: JSON.stringify({ userId: user.id }),
+          headers: { "Content-Type": "application/json" },
+        });
+        if (!res.ok) {
+          console.error("Error linking account");
+        }
+      } catch (error) {
+        console.error("Error in linkAccount event:", error);
+      }
     },
   },
 });

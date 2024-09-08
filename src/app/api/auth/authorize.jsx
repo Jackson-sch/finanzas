@@ -1,10 +1,13 @@
 import { compare } from "bcryptjs";
 import { dbConnect } from "@/lib/mongoose";
 import User from "@/models/User/User";
+import VerificationToken from "@/models/VerificationTokenSchema/VerificationToken";
+import { sendVerificationRequest } from "@/lib/authSendRequest";
+import { nanoid } from "nanoid";
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: "Método no permitido" });
+    return res.status(405).end();
   }
 
   const { email, password } = req.body;
@@ -19,34 +22,47 @@ export default async function handler(req, res) {
     const user = await User.findOne({ email }).select("+password +emailVerified");
 
     if (!user) {
-      return res.status(400).json({ error: "El correo electrónico no existe" });
+      return res.status(400).json({ error: "El correo electrónico no existe." });
     }
 
     if (!user.password) {
-      return res.status(400).json({ error: "La cuenta no tiene contraseña" });
+      return res.status(400).json({ error: "La cuenta no tiene contraseña." });
     }
 
     const isMatched = await compare(password, user.password);
 
     if (!isMatched) {
-      return res.status(400).json({ error: "Contraseña incorrecta" });
+      return res.status(400).json({ error: "Contraseña incorrecta." });
     }
 
     if (!user.emailVerified) {
-      return res.status(403).json({ error: "Por favor, confirma tu correo electrónico para iniciar sesión." });
+      const existingToken = await VerificationToken.findOne({
+        identifier: user.email,
+      });
+
+      if (existingToken) {
+        await VerificationToken.findOneAndDelete({ identifier: user.email });
+      }
+
+      const token = nanoid();
+      await VerificationToken.create({
+        identifier: user.email,
+        token,
+        expires: new Date(Date.now() + 1000 * 60 * 60 * 24), // 24 horas
+      });
+
+      await sendVerificationRequest(user.email, token);
+
+      return res.status(403).json({ error: "Por favor, confirma tu correo. Se ha enviado un enlace de verificación." });
     }
 
-    const userData = {
-      id: user._id.toString(),
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      role: user.role,
-    };
+    // Eliminar selección de propiedades de seguridad
+    user.password = undefined;
+    user.emailVerified = undefined;
 
-    return res.status(200).json(userData);
+    return res.status(200).json(user);
   } catch (error) {
-    console.error("Error en authorize:", error);
-    return res.status(500).json({ error: "Fallo de autenticación" });
+    console.error("Authorization handler error:", error);
+    return res.status(500).json({ error: "Fallo de autenticación." });
   }
 }
