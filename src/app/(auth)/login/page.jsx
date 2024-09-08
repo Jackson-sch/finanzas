@@ -10,9 +10,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/getSession";
 
 import FormLogin from "../components/FormLogin";
-import { Button } from "@/components/ui/button";
-import { IconBrandGithub, IconBrandGoogleFilled } from "@tabler/icons-react";
-import { signIn } from "@/auth";
+import { IconBrandGoogleFilled } from "@tabler/icons-react";
 import { ButtonSocial } from "../components/ButtonSocial";
 
 export default async function LoginPage({ searchParams }) {
@@ -27,7 +25,7 @@ export default async function LoginPage({ searchParams }) {
     <div className="container m-auto flex min-h-screen w-full max-w-lg flex-col items-center justify-center">
       <Card>
         <CardHeader>
-          <CardTitle>Login</CardTitle>
+          <CardTitle className="text-2xl text-center">Login</CardTitle>
           <CardDescription>
             Ingrese sus credenciales para acceder a su cuenta
           </CardDescription>

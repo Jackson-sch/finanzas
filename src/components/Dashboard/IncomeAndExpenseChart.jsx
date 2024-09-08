@@ -54,26 +54,36 @@ export default function IncomeAndExpenseChart({ transactions }) {
       description="Ingresos vs Egresos por meses del último año"
       className="shadow-lg"
     >
-      <ResponsiveContainer width="100%" height={415}>
-        <BarChart data={data}>
-          <defs>
-            <linearGradient id="gradIngresos" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#105494" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#2086d7" stopOpacity={0.3} />
-            </linearGradient>
-            <linearGradient id="gradEgresos" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#EF4444" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#F87171" stopOpacity={0.3} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis tickFormatter={value => `S/ ${value.toLocaleString()}`} />
-          <Tooltip formatter={(value) => `S/ ${value.toLocaleString()}`} labelFormatter={(value) => capitalize(value)} />
-          <Bar dataKey="ingresos" fill="url(#gradIngresos)" />
-          <Bar dataKey="egresos" fill="url(#gradEgresos)" />
-        </BarChart>
-      </ResponsiveContainer>
+      {/* si no hay datos para el gráfico, muestra un mensaje */}
+      {data.length === 0 ? (
+        <p className="text-center text-muted-foreground">
+          No hay datos para mostrar
+        </p>
+      ) : (
+        <ResponsiveContainer width="100%" height={415}>
+          <BarChart data={data}>
+            <defs>
+              <linearGradient id="gradIngresos" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#105494" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#2086d7" stopOpacity={0.3} />
+              </linearGradient>
+              <linearGradient id="gradEgresos" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#EF4444" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#F87171" stopOpacity={0.3} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
+            <YAxis tickFormatter={(value) => `S/ ${value.toLocaleString()}`} />
+            <Tooltip
+              formatter={(value) => `S/ ${value.toLocaleString()}`}
+              labelFormatter={(value) => capitalize(value)}
+            />
+            <Bar dataKey="ingresos" fill="url(#gradIngresos)" />
+            <Bar dataKey="egresos" fill="url(#gradEgresos)" />
+          </BarChart>
+        </ResponsiveContainer>
+      )}
     </CardComponent>
   );
 }

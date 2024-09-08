@@ -7,6 +7,11 @@ export const DataGeneralSidebar = [
     href: "/dashboard",
   },
   {
+    icon: Wallet,
+    label: "Transacciones",
+    href: "/transactions",
+  },
+  {
     icon: DollarSign,
     label: "Prestamos",
     href: "/prestamos",
@@ -16,16 +21,11 @@ export const DataGeneralSidebar = [
     label: "Pagos de préstamos",
     href: "/pagos-prestamos",
   },
-  {
-    icon: Wallet,
-    label: "Transacciones",
-    href: "/transactions",
-  },
-  {
+  /* {
     icon: SquareKanban,
     label: "Reportes",
     href: "/reportes",
-  },
+  }, */
 ];
 
 /* export const dataAdminSidebar = [

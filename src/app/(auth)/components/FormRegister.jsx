@@ -141,9 +141,9 @@ const handleSubmit = async (formData) => {
         </Button>
 
         <p className="text-center text-sm text-gray-500">
-          Already have an account?{" "}
-          <Link href="/login" className="hover:text-brand underline">
-            Login
+          ¿Ya tienes una cuenta?{" "}
+          <Link href="/login" className="text-blue-500 underline">
+            Iniciar Sesión
           </Link>
         </p>
       </form>

@@ -1,9 +1,8 @@
 import { CardComponent } from "@/components/CardComponent";
-import { currencyFormatter } from "@/utils/CurrencyFormatter"; 
+import { currencyFormatter } from "@/utils/CurrencyFormatter";
 import { format, addMonths, isBefore } from "date-fns";
 
 export default function CurrentLoans({ loans }) {
-
   // traemos los ultimos 5 prestamos
   loans = loans.slice(-5).reverse();
   return (
@@ -11,9 +10,14 @@ export default function CurrentLoans({ loans }) {
       <CardComponent
         title="Préstamos Actuales"
         description="Información sobre los préstamos actuales"
-        className="shadow-lg h-full"
+        className="h-full shadow-lg"
       >
         <div className="space-y-6">
+          {loans.length === 0 && (
+            <p className="text-center text-muted-foreground">
+              No hay datos para mostrar
+            </p>
+          )}
           {loans.map((loan) => {
             const startDate = new Date(loan.date);
             const dueDate = addMonths(startDate, loan.durationMonths);
@@ -37,7 +41,7 @@ export default function CurrentLoans({ loans }) {
                 </div>
                 <div className="text-right">
                   <div className="font-medium text-gray-800">
-                   {currencyFormatter.format(loan.amount)}
+                    {currencyFormatter.format(loan.amount)}
                   </div>
                   <div
                     className={`text-xs ${

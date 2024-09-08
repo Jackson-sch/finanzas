@@ -74,9 +74,15 @@ export default function SpendingTrendChart({ transactions }) {
     <CardComponent
       title="Tendencia de Ingresos y Egresos"
       description="Ingresos y egresos por mes"
-      className="bg-white shadow-lg"
+      className="bg-white shadow-lg h-full"
     >
-      <ResponsiveContainer width="100%" height={350}>
+      {/* si no hay datos para el gráfico, muestra un mensaje */}
+      {data.length === 0 ? (
+        <p className="text-center text-muted-foreground">
+          No hay datos para mostrar
+        </p>
+      ) : (
+        <ResponsiveContainer width="100%" height={350}>
         <AreaChart
           data={data}
           margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
@@ -121,6 +127,8 @@ export default function SpendingTrendChart({ transactions }) {
           />
         </AreaChart>
       </ResponsiveContainer>
+      )}
+      
     </CardComponent>
   );
 }

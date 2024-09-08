@@ -1,18 +1,15 @@
-import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
-import authConfig from "./auth.config";
-
-const { auth } = NextAuth(authConfig);
-
-const publicRoutes = ["/", "/prices"];
-const authRoutes = ["/login", "/register"];
-const apiAuthPrefix = "/api/auth";
+import { auth } from "./auth";
 
 export default auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
 
-  console.log({ isLoggedIn, path: nextUrl.pathname });
+
+  // Rutas públicas y de autenticación
+  const publicRoutes = ["/dashboard"];
+  const authRoutes = ["/login", "/register"];
+  const apiAuthPrefix = "/api/auth";
 
   // Permitir todas las rutas de API de autenticación
   if (nextUrl.pathname.startsWith(apiAuthPrefix)) {
@@ -30,11 +27,7 @@ export default auth((req) => {
   }
 
   // Redirigir a /login si el usuario no está logueado y trata de acceder a una ruta protegida
-  if (
-    !isLoggedIn &&
-    !authRoutes.includes(nextUrl.pathname) &&
-    !publicRoutes.includes(nextUrl.pathname)
-  ) {
+  if (!isLoggedIn && !authRoutes.includes(nextUrl.pathname) && !publicRoutes.includes(nextUrl.pathname)) {
     return NextResponse.redirect(new URL("/login", nextUrl));
   }
 

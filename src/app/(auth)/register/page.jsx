@@ -15,7 +15,7 @@ export default function Register() {
     <div className="container m-auto flex min-h-screen w-full max-w-lg flex-col items-center justify-center">
       <Card>
         <CardHeader>
-          <CardTitle>Register</CardTitle>
+          <CardTitle className="text-2xl text-center">Register</CardTitle>
           <CardDescription>
             Complete el formulario para crear su cuenta
           </CardDescription>
