@@ -11,7 +11,7 @@ export default async function LoansPage() {
   }
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-1 md:p-6">
       <div className="mx-auto">
         <Prestamos session={session} />
       </div>

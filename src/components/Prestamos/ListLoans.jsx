@@ -39,6 +39,7 @@ import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
 import { formatLocalDate } from "@/utils/formatDate";
 import InputSearch from "@/components/InputSearch";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 
 export default function Component({ loans, deleteLoan }) {
   const [search, setSearch] = useState("");
@@ -111,14 +112,13 @@ export default function Component({ loans, deleteLoan }) {
     return items;
   };
 
-
   return (
     <CardComponent
       title="Lista de prestatarios"
       description="Ver la lista de prestatarios registrados."
       className="w-full shadow-lg"
     >
-      <div className="mb-4 flex justify-between">
+      <div className="mb-4 flex flex-col justify-between gap-4 md:flex-row">
         <div className="max-w-sm flex-1">
           <InputSearch
             setSearchTerm={setSearch}
@@ -127,7 +127,7 @@ export default function Component({ loans, deleteLoan }) {
           />
         </div>
         <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full md:w-[180px]">
             <SelectValue placeholder="Ordenar por" />
           </SelectTrigger>
           <SelectContent>
@@ -137,61 +137,70 @@ export default function Component({ loans, deleteLoan }) {
           </SelectContent>
         </Select>
       </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Fecha</TableHead>
-            <TableHead>Prestatario</TableHead>
-            <TableHead className="text-right">Monto Inicial</TableHead>
-            <TableHead className="text-right">Pago mensual</TableHead>
-            <TableHead className="text-right">Total</TableHead>
-            <TableHead className="text-right">Acciones</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredAndSortedLoans.length === 0 && (
+      <ScrollArea className="h-full w-full">
+        <Table>
+          <TableHeader>
             <TableRow>
-              <TableCell colSpan={6} className="h-24 text-center capitalize text-xl">
-                No hay prestatarios registrados
-              </TableCell>
+              <TableHead>Fecha</TableHead>
+              <TableHead>Prestatario</TableHead>
+              <TableHead className="text-right">Monto Inicial</TableHead>
+              <TableHead className="text-right">Pago mensual</TableHead>
+              <TableHead className="text-right">Total</TableHead>
+              <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
-          )}
-          {paginatedLoans.map((loan) => {
-            const loanData = calculateSimulatorData(loan);
-            return (
-              <TableRow key={loan._id}>
-                <TableCell>{formatLocalDate(loan.date)}</TableCell>
-                <TableCell>{capitalize(loanData.borrower)}</TableCell>
-                <TableCell className="text-right">
-                  {currencyFormatter.format(loanData.loanAmount)}
-                </TableCell>
-                <TableCell className="text-right">
-                  {currencyFormatter.format(loanData.paymentAmount)}
-                </TableCell>
-                <TableCell className="text-right font-bold">
-                  {currencyFormatter.format(loanData.totalAmount)}
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="mr-2"
-                    onClick={() => deleteLoan(loan._id)}
-                  >
-                    <Trash className="h-4 w-4" />
-                  </Button>
+          </TableHeader>
+
+          <TableBody>
+            {filteredAndSortedLoans.length === 0 && (
+              <TableRow>
+                <TableCell
+                  colSpan={6}
+                  className="h-24 text-center text-xl capitalize"
+                >
+                  No hay prestatarios registrados
                 </TableCell>
               </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
-      <div className="mt-4 flex items-center justify-between">
-        <div className="max-w-sm text-sm">
+            )}
+            {paginatedLoans.map((loan) => {
+              const loanData = calculateSimulatorData(loan);
+              return (
+                <TableRow key={loan._id}>
+                  <TableCell>{formatLocalDate(loan.date)}</TableCell>
+                  <TableCell>{capitalize(loanData.borrower)}</TableCell>
+                  <TableCell className="text-right">
+                    {currencyFormatter.format(loanData.loanAmount)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {currencyFormatter.format(loanData.paymentAmount)}
+                  </TableCell>
+                  <TableCell className="text-right font-bold">
+                    {currencyFormatter.format(loanData.totalAmount)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="mr-2"
+                      onClick={() => deleteLoan(loan._id)}
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+          
+        </Table>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
+
+      <div className="mt-4 w-full flex flex-col items-center justify-between gap-4 md:flex-row">
+        <div className="w-full text-sm">
           Mostrando {paginatedLoans.length} de {filteredAndSortedLoans.length}{" "}
           préstamos
         </div>
-        <Pagination>
+        <Pagination className="md:justify-end">
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious

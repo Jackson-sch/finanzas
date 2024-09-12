@@ -36,7 +36,7 @@ export default async function LoginPage({ searchParams }) {
             isVerified={isVerified}
             OAuthAccountNotLinked={OAuthAccountNotLinked}
           />
-          <div className="w-full">
+          <div className=" max-w-screen-sm">
             <ButtonSocial provider="google">
               <IconBrandGoogleFilled className="mr-2 h-4 w-4" />
               Continuar con Google

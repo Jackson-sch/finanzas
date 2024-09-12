@@ -66,7 +66,7 @@ export default function FormLogin({ isVerified, OAuthAccountNotLinked }) {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="grid w-96 items-start gap-4"
+          className="grid max-w-96 items-start gap-4"
         >
           <div className="grid gap-2">
             <FormField

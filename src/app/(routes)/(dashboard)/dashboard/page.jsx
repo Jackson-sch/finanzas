@@ -11,8 +11,8 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="flex min-h-screen">
-      <div className="flex-1">
+    <div className="min-h-screen p-1 md:p-6">
+      <div className="mx-auto">
         <PanelDashboard session={session} />
       </div>
     </div>

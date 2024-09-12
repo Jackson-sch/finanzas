@@ -74,9 +74,9 @@ const handleSubmit = async (formData) => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
-        className="grid w-96 items-start gap-4"
+        className="grid max-w-96 items-start gap-4"
       >
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <FormField
             control={form.control}
             name="firstName"

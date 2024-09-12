@@ -8,7 +8,7 @@ export default async function TransactionPage() {
     return <div>Not logged in</div>;
   }
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-1 md:p-6">
       <div className="mx-auto">
         <Transaction session={session} />
       </div>

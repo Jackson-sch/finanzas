@@ -54,7 +54,7 @@ export default function FinancialSummary({
       className="shadow-lg"
     >
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Período actual</h2>
+        <h2 className="text-sm md:text-2xl font-bold">Período actual</h2>
         <Select
           value={summaryPeriod}
           onValueChange={(value) => {

@@ -5,6 +5,7 @@ import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
 import React from "react";
 import { format, isAfter, subDays } from "date-fns"; // Importa las funciones necesarias de date-fns
 import { es } from "date-fns/locale"; // Importa la localización en español
+import { currencyFormatter } from "@/utils/CurrencyFormatter";
 
 export default function LatestTransactions({ transactions }) {
   // Calcula la fecha de hace 30 días desde hoy
@@ -14,14 +15,6 @@ export default function LatestTransactions({ transactions }) {
   const filteredTransactions = transactions.filter((transaction) =>
     isAfter(new Date(transaction.date), thirtyDaysAgo),
   );
-
-  // Configuración para formatear números como moneda peruana
-  const currencyFormatter = new Intl.NumberFormat("es-PE", {
-    style: "currency",
-    currency: "PEN",
-    minimumFractionDigits: 2, // Asegura dos decimales
-    maximumFractionDigits: 2,
-  });
 
   return (
     <CardComponent
@@ -45,16 +38,16 @@ export default function LatestTransactions({ transactions }) {
                   }`}
                 >
                   {transaction.type === "ingreso" ? (
-                    <ArrowUpIcon className="h-4 w-4 text-white" />
+                    <ArrowUpIcon className="h-3 w-3 text-white md:h-4 md:w-4" />
                   ) : (
-                    <ArrowDownIcon className="h-4 w-4 text-white" />
+                    <ArrowDownIcon className="h-3 w-3 text-white md:h-4 md:w-4" />
                   )}
                 </div>
                 <div className="ml-4 flex-grow space-y-1">
                   <p className="text-sm font-medium leading-none text-gray-800">
                     {transaction.category}
                   </p>
-                  <p className="text-xs text-gray-600 capitalize">
+                  <p className="text-xs capitalize text-gray-600">
                     {/* Formatea la fecha usando date-fns */}
                     {format(new Date(transaction.date), "dd MMMM yyyy", {
                       locale: es,
@@ -63,14 +56,16 @@ export default function LatestTransactions({ transactions }) {
                   </p>
                 </div>
                 <div
-                  className={`font-medium ${
+                  className={` ${
                     transaction.type === "ingreso"
                       ? "text-green-500"
                       : "text-red-500"
                   }`}
                 >
-                  {transaction.type === "ingreso" ? "+" : "-"}
-                  {currencyFormatter.format(transaction.amount)}
+                  <p className="text-xs font-medium md:pr-2 md:text-base">
+                    {transaction.type === "ingreso" ? "+" : "-"}
+                    {currencyFormatter.format(transaction.amount)}
+                  </p>
                 </div>
               </div>
             ))

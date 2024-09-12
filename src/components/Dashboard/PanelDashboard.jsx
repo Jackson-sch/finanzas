@@ -128,89 +128,80 @@ export default function PanelDashboard({ session }) {
   }, [session?.user?.email]);
 
   return (
-    <div className="flex-col md:flex">
-      <div className="flex-1 space-y-4 p-8 pt-6">
-        <div className="flex items-center justify-between space-y-2">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-800 dark:text-white">
-            Dashboard Financiero
-          </h2>
-          <div className="flex items-center space-x-2">
-            <Button className="bg-blue-600 text-white hover:bg-blue-700">
-              Generar Reporte
-            </Button>
-          </div>
-        </div>
+    <div className="flex flex-col gap-4 pt-3">
+      <header className="flex items-center justify-between rounded-md bg-primary px-6 py-4 text-primary-foreground">
+        <h1 className="text-xl font-bold md:text-2xl">Dashboard Financiero</h1>
+      </header>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <StatCard
-            title="Balance Total"
-            amount={balanceTotal}
-            change={balanceChange}
-            icon={DollarSignIcon}
-            changeIcon={balanceChange >= 0 ? TrendingUpIcon : TrendingDownIcon}
-            changeColor={balanceChange >= 0 ? "text-green-500" : "text-red-500"}
-          />
-          <StatCard
-            title="Ingresos"
-            amount={ingresos}
-            change={ingresoChange}
-            icon={ArrowUpIcon}
-            changeIcon={ingresoChange >= 0 ? TrendingUpIcon : TrendingDownIcon}
-            changeColor={ingresoChange >= 0 ? "text-green-500" : "text-red-500"}
-          />
-          <StatCard
-            title="Egresos"
-            amount={egresos}
-            change={egresoChange}
-            icon={ArrowDownIcon}
-            changeIcon={egresoChange >= 0 ? TrendingDownIcon : TrendingUpIcon}
-            changeColor={egresoChange >= 0 ? "text-red-500" : "text-green-500"}
-          />
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Balance Total"
+          amount={balanceTotal}
+          change={balanceChange}
+          icon={DollarSignIcon}
+          changeIcon={balanceChange >= 0 ? TrendingUpIcon : TrendingDownIcon}
+          changeColor={balanceChange >= 0 ? "text-green-500" : "text-red-500"}
+        />
+        <StatCard
+          title="Ingresos"
+          amount={ingresos}
+          change={ingresoChange}
+          icon={ArrowUpIcon}
+          changeIcon={ingresoChange >= 0 ? TrendingUpIcon : TrendingDownIcon}
+          changeColor={ingresoChange >= 0 ? "text-green-500" : "text-red-500"}
+        />
+        <StatCard
+          title="Egresos"
+          amount={egresos}
+          change={egresoChange}
+          icon={ArrowDownIcon}
+          changeIcon={egresoChange >= 0 ? TrendingDownIcon : TrendingUpIcon}
+          changeColor={egresoChange >= 0 ? "text-red-500" : "text-green-500"}
+        />
 
-          <Card className="bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Préstamos Activos
-              </CardTitle>
-              <CreditCardIcon className="h-4 w-4 text-blue-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-gray-800 dark:text-white">
-                {loans.length}
-              </div>
-              <p className="text-xs text-blue-500">
-                Total:{" "}
-                {currencyFormatter.format(
-                  loans
-                    .reduce((total, loan) => total + loan.amount, 0)
-                    .toFixed(2),
-                )}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <div className="col-span-4">
-            <IncomeAndExpenseChart transactions={transactions} />
-          </div>
-          <div className="col-span-3">
-            <CurrentLoans loans={loans} />
-          </div>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <div className="col-span-4">
-            <SpendingTrendChart transactions={transactions} />
-          </div>
-
-          <div className="col-span-3">
-            <ExpenseCategoryChart transactions={transactions} COLORS={COLORS} />
-          </div>
-        </div>
-
-        <LatestTransactions transactions={transactions} />
+        <Card className="bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              Préstamos Activos
+            </CardTitle>
+            <CreditCardIcon className="h-4 w-4 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-gray-800 dark:text-white">
+              {loans.length}
+            </div>
+            <p className="text-xs text-blue-500">
+              Total:{" "}
+              {currencyFormatter.format(
+                loans
+                  .reduce((total, loan) => total + loan.amount, 0)
+                  .toFixed(2),
+              )}
+            </p>
+          </CardContent>
+        </Card>
       </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <div className="col-span-7 md:col-span-4">
+          <IncomeAndExpenseChart transactions={transactions} />
+        </div>
+        <div className="col-span-7 md:col-span-3 w-full">
+          <CurrentLoans loans={loans} />
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <div className="col-span-7 md:col-span-4">
+          <SpendingTrendChart transactions={transactions} />
+        </div>
+
+        <div className="col-span-7 md:col-span-3">
+          <ExpenseCategoryChart transactions={transactions} COLORS={COLORS} />
+        </div>
+      </div>
+
+      <LatestTransactions transactions={transactions} />
     </div>
   );
 }

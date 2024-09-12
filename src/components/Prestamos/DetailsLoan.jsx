@@ -11,16 +11,18 @@ import {
   Clock,
 } from "lucide-react";
 import { currencyFormatter } from "@/utils/CurrencyFormatter";
+import { formatLocalDate } from "@/utils/formatDate";
 
 export default function DetailsLoan({ simulatorData }) {
+
   if (!simulatorData) {
     return (
       <CardComponent
         title="Detalles del prestatario"
         description="Vea los detalles y el cronograma de su préstamo."
-        className="shadow-lg"
+        className="shadow-lg h-full"
       >
-        <Card>
+        <Card className="container mx-auto">
           <CardContent className="pt-6">
             <p className="text-center text-muted-foreground">
               No hay datos disponibles para mostrar.
@@ -48,12 +50,20 @@ export default function DetailsLoan({ simulatorData }) {
       className="shadow-lg"
     >
       <div className="space-y-6">
-        <DetailItem
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <DetailItem
           icon={User}
           label="Prestatario"
           value={simulatorData.borrower}
           className="capitalize"
         />
+          <DetailItem
+            icon={Calendar}
+            label="Fecha de inicio"
+            value={`${formatLocalDate(simulatorData.date)}`}
+          />
+        </div>
+        
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <DetailItem
@@ -89,7 +99,7 @@ export default function DetailsLoan({ simulatorData }) {
           />
           <DetailItem
             icon={DollarSign}
-            label="Monto de pago mensual"
+            label="Monto de pago por cuota"
             value={`${currencyFormatter.format(simulatorData.paymentAmount)}`}
           />
         </div>

@@ -1,14 +1,7 @@
 import { CardComponent } from "@/components/CardComponent";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   Table,
   TableHeader,
@@ -35,14 +28,14 @@ export default function PaymentHistory({ payments, loans, deletePayment }) {
       if (loan) {
         const loanData = calculateSimulatorData(loan, payment.paymentNumber);
 
-        if (payment.paymentNumber >= loanData.totalPayments) {
+        /* if (payment.paymentNumber >= loanData.totalPayments) {
           toast({
             title: "Préstamo pagado",
             description: `El préstamo de ${capitalize(loanData.borrower)} ha sido pagado completamente`,
             status: "success",
             duration: 4000,
           });
-        }
+        } */
       }
     });
   }, [payments, loans, toast]);
@@ -145,6 +138,7 @@ export default function PaymentHistory({ payments, loans, deletePayment }) {
             })}
           </TableBody>
         </Table>
+        <ScrollBar orientation="horizontal" />
       </ScrollArea>
     </CardComponent>
   );

@@ -1,8 +1,6 @@
 import { auth } from "@/auth";
 import Payments from "@/components/Payments/Payments";
 
-
-
 export default async function PaymentsPage() {
   const session = await auth();
 
@@ -11,7 +9,7 @@ export default async function PaymentsPage() {
   }
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-1 md:p-6">
       <div className="mx-auto">
         <Payments session={session} />
       </div>

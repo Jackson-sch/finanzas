@@ -77,7 +77,7 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
 
   const getNextPaymentNumber = (loanId) => {
     const existingPayments = payments.filter(
-      (payment) => payment.loanId === loanId
+      (payment) => payment.loanId === loanId,
     );
     return existingPayments.length + 1; // Siguiente número de cuota es el total de pagos + 1
   };
@@ -87,7 +87,7 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
       const existingPayment = payments.find(
         (payment) =>
           payment.loanId === selectedLoan._id &&
-          payment.paymentNumber === parseInt(paymentNumber, 10)
+          payment.paymentNumber === parseInt(paymentNumber, 10),
       );
 
       if (existingPayment) {
@@ -120,16 +120,18 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
 
       // Obtener el número de pagos realizados
       const paymentsMade = payments.filter(
-        (payment) => payment.loanId === loan._id
+        (payment) => payment.loanId === loan._id,
       ).length;
 
       // Filtrar préstamos con saldo pendiente mayor a 0 y pagos incompletos
       return (
-        remainingAmount > 0 &&
-        paymentsMade < loanData.totalPayments // Suponiendo que loanData.totalPayments es el número total de cuotas del préstamo
+        remainingAmount > 0 && paymentsMade < loanData.totalPayments // Suponiendo que loanData.totalPayments es el número total de cuotas del préstamo
       );
     });
-
+    console.log(
+      "🚀 ~ PaymentsLoad ~ loansWithPendingBalance:",
+      loansWithPendingBalance,
+    );
     setFilteredLoans(loansWithPendingBalance);
   }, [loans, payments]); // Agregamos 'payments' como dependencia para actualizar la lista si cambian los pagos.
 
@@ -144,68 +146,70 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
       <CardContent className="space-y-4">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)}>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+              {/* <pre>{JSON.stringify(filteredLoans, null, 2)}</pre> */}
               <div className="space-y-2">
-                <FormField
-                  control={form.control}
-                  name="loanId"
-                  render={({ field }) => (
-                    <FormItem className="space-y-2">
-                      <FormLabel>Prestatario</FormLabel>
-                      <Select
-                        value={field.value}
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          handleLoanChange(value);
-                        }}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Seleccione un prestatario" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <ScrollArea className="h-[300px] pr-4">
-                            {filteredLoans.map((loan) => {
-                              const loanData = calculateSimulatorData(loan);
-                              return (
-                                <SelectItem
-                                  key={loan._id}
-                                  value={loan._id}
-                                  className="flex flex-col space-y-1 border-b border-gray-100 py-2 last:border-none"
-                                >
-                                  <div className="flex items-center space-x-2">
-                                    <User className="h-4 w-4 text-gray-500" />
-                                    <span className="font-medium">
-                                      {capitalize(loan.borrower)}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center space-x-2 text-sm text-gray-500">
-                                    <Badge
-                                      variant="outline"
-                                      className="font-normal"
-                                    >
-                                      <CreditCard className="mr-1 h-3 w-3" />
-                                      {currencyFormatter.format(loan.amount)}
-                                    </Badge>
-                                    <Badge
-                                      variant="secondary"
-                                      className="font-normal"
-                                    >
-                                      Cuota:{" "}
-                                      {currencyFormatter.format(loanData.paymentAmount)}
-                                    </Badge>
-                                  </div>
-                                </SelectItem>
-                              );
-                            })}
-                          </ScrollArea>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <FormField
+  control={form.control}
+  name="loanId"
+  render={({ field }) => (
+    <FormItem className="space-y-2">
+      <FormLabel>Prestatario</FormLabel>
+      <Select
+        value={field.value}
+        onValueChange={(value) => {
+          field.onChange(value);
+          handleLoanChange(value);
+        }}
+      >
+        <FormControl>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Seleccione un prestatario" />
+          </SelectTrigger>
+        </FormControl>
+        <SelectContent>
+          <ScrollArea className="h-[300px] pr-4">
+            {filteredLoans.length > 0 ? (
+              filteredLoans.map((loan) => {
+                const loanData = calculateSimulatorData(loan);
+                return (
+                  <SelectItem
+                    key={loan._id}
+                    value={loan._id}
+                    className="flex flex-col space-y-1 border-b border-gray-100 py-2 last:border-none"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <User className="h-4 w-4 text-gray-500" />
+                      <span className="font-medium">
+                        {capitalize(loan.borrower)}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2 text-sm text-gray-500">
+                      <Badge variant="outline" className="font-normal">
+                        <CreditCard className="mr-1 h-3 w-3" />
+                        {currencyFormatter.format(loan.amount)}
+                      </Badge>
+                      <Badge variant="secondary" className="font-normal">
+                        Cuota:{" "}
+                        {currencyFormatter.format(loanData.paymentAmount)}
+                      </Badge>
+                    </div>
+                  </SelectItem>
+                );
+              })
+            ) : (
+              <div className="text-center text-muted-foreground py-2">
+                No hay datos disponibles
+              </div>
+            )}
+          </ScrollArea>
+        </SelectContent>
+      </Select>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
               </div>
 
               <div className="space-y-2">
@@ -288,8 +292,8 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
                             onSelect={(date) =>
                               field.onChange(date?.toISOString())
                             }
-                            disabled={(date) =>
-                              date > new Date() // Desactivar fechas futuras
+                            disabled={
+                              (date) => date > new Date() // Desactivar fechas futuras
                             }
                           />
                         </PopoverContent>
@@ -301,12 +305,11 @@ export default function PaymentsLoad({ loans, handleSubmitPayment, payments }) {
               </div>
             </div>
             <div className="flex justify-end">
-              <Button type="submit" className="mt-4">
-              <PlusCircleIcon className="mr-2 h-4 w-4" />
-              Registrar pago
-            </Button>
+              <Button type="submit" className="mt-4 w-full">
+                <PlusCircleIcon className="mr-2 h-4 w-4" />
+                Registrar pago
+              </Button>
             </div>
-            
           </form>
         </Form>
       </CardContent>

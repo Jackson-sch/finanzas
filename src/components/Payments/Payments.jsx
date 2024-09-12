@@ -102,7 +102,7 @@ export default function Payments({ session }) {
   return (
     <div className="mx-auto space-y-8">
       <header className="flex items-center justify-between rounded-md bg-primary px-6 py-4 text-primary-foreground">
-        <h1 className="text-2xl font-bold">Gestión pagos de préstamos</h1>
+        <h1 className="font-bold md:text-2xl">Gestión pagos de préstamos</h1>
       </header>
       <main className="flex flex-col gap-4">
         <div>

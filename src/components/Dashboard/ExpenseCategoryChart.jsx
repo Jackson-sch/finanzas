@@ -36,13 +36,13 @@ export default function ExpenseCategoryChart({ transactions, COLORS }) {
     <CardComponent
       title="Gastos por Categoría"
       description="Distribución de gastos por categoría"
-      className="h-full shadow-lg"
+      className="h-full shadow-lg min-w-max"
     >
       {/* si no hay datos para el gráfico, muestra un mensaje */}
       {dataForChart.length === 0 ? (
         <p className="text-center text-muted-foreground ">No hay datos para mostrar</p>
       ) : (
-        <ResponsiveContainer width="100%" height={200}>
+        <ResponsiveContainer width={"100%"} height={200}>
           <PieChart>
             <defs>
               {dataForChart.map((entry, index) => (

@@ -73,7 +73,9 @@ export default function Prestamos({ session }) {
       try {
         const loansData = await fetchLoans();
         // Filtra los prestamos por usuario actual por su campo email
-        const loansDataFiltered = loansData.filter((loan) => loan.email === session?.user?.email);
+        const loansDataFiltered = loansData.filter(
+          (loan) => loan.email === session?.user?.email,
+        );
         setLoans(loansDataFiltered);
       } catch (error) {
         console.error("Error al obtener los préstamos:", error.message);
@@ -102,7 +104,7 @@ export default function Prestamos({ session }) {
       null,
       "Préstamo eliminado",
       "El prestatario ha sido eliminado exitosamente",
-    )
+    );
 
     if (success) {
       const updatedLoans = loans.filter((loan) => loan._id !== id);
@@ -113,19 +115,23 @@ export default function Prestamos({ session }) {
   return (
     <div className="mx-auto space-y-8">
       <header className="flex items-center justify-between rounded-md bg-primary px-6 py-4 text-primary-foreground">
-        <h1 className="text-2xl font-bold">Gestión de préstamos</h1>
+        <h1 className="text-xl font-bold md:text-2xl">Gestión de préstamos</h1>
       </header>
       <main className="flex-1 gap-4">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <RegisterForm
-            onSubmit={handleSubmit}
-            onSimulator={handleSimulator}
-            session={session}
-          />
-          <DetailsLoan simulatorData={simulatorData} />
+        <div className="grid grid-cols-1 gap-6 2xl:grid-cols-2">
+          <div className="col-span-1 w-full">
+            <RegisterForm
+              onSubmit={handleSubmit}
+              onSimulator={handleSimulator}
+              session={session}
+            />
+          </div>
+          <div>
+            <DetailsLoan simulatorData={simulatorData} />
+          </div>
         </div>
 
-        <div className="mb-5 mt-6">
+        <div className="mt-6">
           <ListLoans loans={loans} deleteLoan={deleteLoan} />
         </div>
       </main>

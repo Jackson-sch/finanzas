@@ -1,32 +1,39 @@
-import { object, string, coerce } from "zod";
+import { object, string, number, enum as zEnum } from "zod";
 
 export const loanSchema = object({
   email: string({
     required_error: "El correo electrónico del usuario es obligatorio.",
   }).email("Debe ser un correo electrónico válido."),
+  
   borrower: string({
     required_error: "El nombre del prestatario es obligatorio.",
+  }).min(1, "El nombre del prestatario no puede estar vacío."),
+  
+  amount: number().positive("El monto debe ser positivo"),
+  
+  interestYear: number().min(0, "La tasa de interés no puede ser negativa"),
+  
+  interestRate: number().min(0, "La tasa de interés no puede ser negativa"),
+  
+  durationYears: number().min(0, "La duración no puede ser negativa"),
+  
+  durationMonths: number().min(0, "La duración no puede ser negativa"),
+  
+  date: string().refine((date) => !isNaN(Date.parse(date)), {
+    message: "Fecha inválida",
   }),
-  amount: string({
-    required_error: "El monto del préstamo es obligatorio.",
-  }),
-  interestYear: string({
-    required_error: "La tasa de interés anual del préstamo es obligatoria.",
-  }),
-  interestRate: string({
-    required_error: "El interés del préstamo es obligatorio.",
-  }),
-  durationYears: string({
-    required_error: "La duración del préstamo es obligatoria.",
-  }),
-  durationMonths: coerce.number({
-    required_error: "La duración del préstamo es obligatoria.",
-  }).int(),
-  date: string({
-    required_error: "La fecha del préstamo es obligatoria.",
-  }),
-  paymentFrequency: string({
-    required_error: "La frecuencia de pago del préstamo es obligatoria.",
-  }),
+  
+  paymentFrequency: zEnum(["Mensual", "Trimestral", "Semestral", "Anual"]),
+  
+  loanType: zEnum(["Personal", "Hipotecario", "Automotriz", "Otro"]),
+  
+  interestType: zEnum(["Fijo", "Variable"]),
+  
+  estimatedPayment: number().optional(),
+  
+  openingCosts: number().min(0, "Los costos no pueden ser negativos").optional(),
+  
+  insurance: number().min(0, "El costo del seguro no puede ser negativo").optional(),
+  
+  amortizationMethod: zEnum(["Francés", "Alemán", "Americano"]),
 });
-

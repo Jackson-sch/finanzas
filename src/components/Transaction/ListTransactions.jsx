@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { format, isWithinInterval } from "date-fns";
 import { es } from "date-fns/locale";
 import { CardComponent } from "../CardComponent";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   Table,
   TableBody,
@@ -94,7 +94,7 @@ export default function ListTransactions({
       className="shadow-lg"
     >
       <div className="mb-6 grid gap-6">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="max-w-sm flex-1">
             <InputSearch
               setSearchTerm={setSearchTerm}
@@ -102,7 +102,7 @@ export default function ListTransactions({
               placeholder="Buscar por descripción, categoría o etiqueta"
             />
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col md:flex-row items-center gap-4">
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Filtrar por tipo" />
@@ -229,6 +229,7 @@ export default function ListTransactions({
             ))}
           </TableBody>
         </Table>
+        <ScrollBar orientation="horizontal" />
       </ScrollArea>
     </CardComponent>
   );

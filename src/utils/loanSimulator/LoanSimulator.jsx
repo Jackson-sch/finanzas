@@ -32,9 +32,30 @@ export const getPaymentsPerYear = (paymentFrequency) => {
 };
 
 // Calcula el total de pagos en base a la duración en meses y la frecuencia de pago
-export const getTotalPayments = (durationMonths, paymentFrequency) => {
+export const getTotalPayments = (totalDurationMonths, paymentFrequency) => {
   const paymentsPerYear = getPaymentsPerYear(paymentFrequency);
-  return Math.ceil((durationMonths / 12) * paymentsPerYear);
+  
+  // Calculamos el número de pagos basándonos en la duración en meses
+  let totalPayments;
+  switch (paymentFrequency) {
+    case "Mensual":
+      totalPayments = totalDurationMonths;
+      break;
+    case "Trimestral":
+      totalPayments = Math.ceil(totalDurationMonths / 3);
+      break;
+    case "Semestral":
+      totalPayments = Math.ceil(totalDurationMonths / 6);
+      break;
+    case "Anual":
+      totalPayments = Math.ceil(totalDurationMonths / 12);
+      break;
+    default:
+      throw new Error("Frecuencia de pago no válida");
+  }
+
+  // Aseguramos que haya al menos un pago
+  return Math.max(1, totalPayments);
 };
 
 // Calcula el monto del pago por periodo (cuota mensual, trimestral, semestral o anual)
@@ -84,28 +105,17 @@ export const calculateSimulatorData = (loanData, paymentNumber = 0) => {
   const loanAmount = parseFloat(loanData.amount);
   const interestRate = parseFloat(loanData.interestRate);
   const interestYear = parseFloat(loanData.interestYear);
-  const durationMonths = parseInt(loanData.durationMonths, 10);
+  const durationYears = parseFloat(loanData.durationYears) || 0;
+  const durationMonths = parseInt(loanData.durationMonths, 10) || 0;
   const paymentFrequency = loanData.paymentFrequency;
+  const date = loanData.date;
 
-  // Si la tasa de interés o la duración es 0, las cuotas y el total a pagar serán específicos
-  if (interestRate === 0 || durationMonths === 0) {
-    return {
-      borrower: loanData.borrower,
-      interestYear: loanData.interestYear,
-      interestRate,
-      equivalentInterestRate: 0,
-      loanAmount: loanAmount.toFixed(2),
-      durationMonths,
-      paymentFrequency,
-      paymentAmount: 0,
-      totalPayments: 0,
-      totalAmount: loanAmount.toFixed(2),
-      remainingAmount: loanAmount.toFixed(2),
-    };
-  }
+  // Calcular la duración en meses
+  const totalDurationMonths = durationYears * 12 + durationMonths;
+
 
   // Si los datos de entrada no son válidos, lanza un error
-  if (isNaN(loanAmount) || isNaN(interestRate) || isNaN(durationMonths)) {
+  if (isNaN(loanAmount) || isNaN(interestRate) || isNaN(totalDurationMonths)) {
     throw new Error("Datos de entrada no válidos para el cálculo del préstamo");
   }
 
@@ -116,20 +126,28 @@ export const calculateSimulatorData = (loanData, paymentNumber = 0) => {
   );
 
   // Calcula el total de pagos en base a la duración en meses y la frecuencia de pago
-  const totalPayments = getTotalPayments(durationMonths, paymentFrequency);
+  const totalPayments = getTotalPayments(totalDurationMonths, paymentFrequency);
 
-  // Calcula el monto del pago por periodo (cuota mensual, trimestral, semestral o anual)
-  const paymentAmount = getPaymentAmount(
-    loanAmount,
-    equivalentInterestRate,
-    totalPayments,
-  ).toFixed(2);
+  let paymentAmount, totalAmount;
 
-  // Calcula el monto total a pagar sumando el monto del préstamo y los intereses
-  const totalAmount = getTotalAmount(
-    parseFloat(paymentAmount),
-    totalPayments,
-  ).toFixed(2);
+    // Si la tasa de interés o la duración es 0, las cuotas y el total a pagar serán específicos
+    if (interestRate === 0) {
+      // Si la tasa de interés es 0, el pago es simplemente el monto del préstamo dividido por el número de pagos
+      paymentAmount = (loanAmount / totalPayments).toFixed(2);
+      totalAmount = loanAmount.toFixed(2);
+    } else {
+      // Calcula el monto del pago por periodo (cuota mensual, trimestral, semestral o anual)
+      paymentAmount = getPaymentAmount(
+        loanAmount,
+        equivalentInterestRate,
+        totalPayments
+      ).toFixed(2);
+  
+      // Calcula el monto total a pagar sumando el monto del préstamo y los intereses
+      totalAmount = getTotalAmount(parseFloat(paymentAmount), totalPayments).toFixed(2);
+    }
+
+
 
   // Calcula el monto restante del préstamo después de ciertos pagos
   const remainingAmount = calculateRemainingAmount(
@@ -146,11 +164,14 @@ export const calculateSimulatorData = (loanData, paymentNumber = 0) => {
     interestRate,
     equivalentInterestRate,
     loanAmount: loanAmount.toFixed(2),
+    durationYears,
     durationMonths,
+    totalDurationMonths,
     paymentFrequency,
     paymentAmount,
     totalPayments,
     totalAmount,
     remainingAmount,
+    date,
   };
 };

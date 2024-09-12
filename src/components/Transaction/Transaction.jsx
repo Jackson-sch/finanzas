@@ -356,7 +356,7 @@ export default function Transaction({ session }) {
   return (
     <div className="mx-auto space-y-8">
       <header className="flex items-center justify-between rounded-md bg-primary px-6 py-4 text-primary-foreground">
-        <h1 className="text-2xl font-bold">Gestión de Ingresos y Egresos</h1>
+        <h1 className=" md:text-2xl font-bold">Gestión de Ingresos y Egresos</h1>
       </header>
 
       <FinancialSummary
