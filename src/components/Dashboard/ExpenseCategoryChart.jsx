@@ -1,6 +1,60 @@
+import React from "react";
 import { CardComponent } from "@/components/CardComponent";
 import { currencyFormatter } from "@/utils/CurrencyFormatter";
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
+import {
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "../ui/chart";
+import capitalize from "@/utils/capitalize";
+
+// Función para generar la configuración del gráfico dinámicamente
+const generateChartConfig = (data) => {
+  const colors = [
+    "hsl(var(--chart-1))",
+    "hsl(var(--chart-2))",
+    "hsl(var(--chart-3))",
+    "hsl(var(--chart-4))",
+    "hsl(var(--chart-5))",
+    "hsl(var(--chart-6))",
+    "hsl(var(--chart-7))",
+    "hsl(var(--chart-8))",
+    "hsl(var(--chart-9))",
+    "hsl(var(--chart-10))",
+    "hsl(var(--chart-11))",
+    "hsl(var(--chart-12))",
+    "hsl(var(--chart-13))",
+    "hsl(var(--chart-14))",
+    "hsl(var(--chart-15))",
+    "hsl(var(--chart-16))",
+    "hsl(var(--chart-17))",
+    "hsl(var(--chart-18))",
+    "hsl(var(--chart-19))",
+    "hsl(var(--chart-20))",
+    // Añade más colores si es necesario
+  ];
+
+  return data.reduce(
+    (config, item, index) => {
+      config[item.name] = {
+        label: capitalize(item.name),
+        color: colors[index % colors.length],
+        dataKey: currencyFormatter.format(item.value),
+      };
+
+      console.log("🚀 ~ generateChartConfig ~ config:", config);
+      return config;
+    },
+
+    {
+      value: { label: data.value },
+      name: { label: data.name },
+    },
+  );
+};
 
 // Función para agrupar transacciones por categoría solo de egresos
 const groupTransactionsByCategory = (transactions) => {
@@ -8,7 +62,6 @@ const groupTransactionsByCategory = (transactions) => {
 
   transactions.forEach((transaction) => {
     const { category, amount } = transaction;
-    // Si la categoría ya existe en groupedData, suma el amount, si no, inicializar
     if (groupedData[category]) {
       groupedData[category] += amount;
     } else {
@@ -16,14 +69,13 @@ const groupTransactionsByCategory = (transactions) => {
     }
   });
 
-  // Convertir el objeto agrupado en un array adecuado para el gráfico
   return Object.keys(groupedData).map((category) => ({
     name: category,
     value: groupedData[category],
   }));
 };
 
-export default function ExpenseCategoryChart({ transactions, COLORS }) {
+export default function ExpenseCategoryChart({ transactions }) {
   // Filtra solo las transacciones de tipo "egreso"
   const expenseTransactions = transactions.filter(
     (transaction) => transaction.type === "egreso",
@@ -31,74 +83,55 @@ export default function ExpenseCategoryChart({ transactions, COLORS }) {
 
   // Transforma las transacciones para que se agrupen por categoría
   const dataForChart = groupTransactionsByCategory(expenseTransactions);
+  console.log("🚀 ~ ExpenseCategoryChart ~ dataForChart:", dataForChart);
+
+  // Genera la configuración del gráfico
+  const chartConfig = generateChartConfig(dataForChart);
+  console.log("🚀 ~ ExpenseCategoryChart ~ chartConfig:", chartConfig);
 
   return (
     <CardComponent
       title="Gastos por Categoría"
       description="Distribución de gastos por categoría"
-      className="h-full shadow-lg min-w-max"
+      className="h-full min-w-max shadow-lg"
     >
-      {/* si no hay datos para el gráfico, muestra un mensaje */}
       {dataForChart.length === 0 ? (
-        <p className="text-center text-muted-foreground ">No hay datos para mostrar</p>
+        <p className="text-center text-muted-foreground">
+          No hay datos para mostrar
+        </p>
       ) : (
-        <ResponsiveContainer width={"100%"} height={200}>
+        <ChartContainer
+          config={chartConfig}
+          className="mx-auto aspect-square max-h-[300px]"
+        >
           <PieChart>
-            <defs>
-              {dataForChart.map((entry, index) => (
-                <linearGradient
-                  key={`gradient-${index}`}
-                  id={`color-${index}`}
-                  x1="0"
-                  y1="0"
-                  x2="1"
-                  y2="1"
-                >
-                  <stop
-                    offset="5%"
-                    stopColor={COLORS[index % COLORS.length]}
-                    stopOpacity={0.8}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor={COLORS[(index + 1) % COLORS.length]}
-                    stopOpacity={0.5}
-                  />
-                </linearGradient>
-              ))}
-            </defs>
             <Pie
               data={dataForChart}
               cx="50%"
               cy="50%"
               labelLine={false}
-              outerRadius={80}
+              outerRadius={110}
               fill="#8884d8"
               dataKey="value"
               nameKey="name"
             >
               {dataForChart.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={`url(#color-${index})`} />
+                <Cell
+                  key={`cell-${index}`}
+                  fill={chartConfig[entry.name].color}
+                />
               ))}
             </Pie>
-            <Tooltip formatter={(value) => currencyFormatter.format(value)} />
+            <ChartTooltip
+              content={<ChartTooltipContent nameKey="name" valueKey="value" />}
+            />
+            <ChartLegend
+              content={<ChartLegendContent nameKey="name" valueKey="value" />}
+              className="flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center"
+            />
           </PieChart>
-        </ResponsiveContainer>
+        </ChartContainer>
       )}
-
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        {dataForChart.map((category, index) => (
-          <div key={index} className="flex items-center">
-            <div
-              className="mr-2 h-3 w-3 rounded-full"
-              style={{ backgroundColor: COLORS[index % COLORS.length] }}
-            ></div>
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              {category.name}
-            </span>
-          </div>
-        ))}
-      </div>
     </CardComponent>
   );
 }

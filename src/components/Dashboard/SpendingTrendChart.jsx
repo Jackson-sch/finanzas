@@ -14,6 +14,13 @@ import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { currencyFormatter } from "@/utils/CurrencyFormatter";
 import capitalize from "@/utils/capitalize";
+import {
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "../ui/chart";
 
 // Función para transformar las transacciones en egresos e ingresos por mes
 const getMonthlyData = (transactions) => {
@@ -27,13 +34,7 @@ const getMonthlyData = (transactions) => {
     const dateObj = parseISO(date);
     const month = format(dateObj, "yyyy-MM");
 
-    if (type === "ingreso") {
-      if (monthlyData.ingresos[month]) {
-        monthlyData.ingresos[month] += amount;
-      } else {
-        monthlyData.ingresos[month] = amount;
-      }
-    } else if (type === "egreso") {
+    if (type === "egreso") {
       if (monthlyData.egresos[month]) {
         monthlyData.egresos[month] += amount;
       } else {
@@ -43,16 +44,12 @@ const getMonthlyData = (transactions) => {
   });
 
   // Convertir el objeto agrupado en un array adecuado para el gráfico
-  const sortedMonths = [
-    ...new Set([
-      ...Object.keys(monthlyData.ingresos),
-      ...Object.keys(monthlyData.egresos),
-    ]),
-  ].sort((a, b) => new Date(a) - new Date(b));
+  const sortedMonths = [...new Set([...Object.keys(monthlyData.egresos)])].sort(
+    (a, b) => new Date(a) - new Date(b),
+  );
 
   return sortedMonths.map((month) => ({
     month: format(parseISO(`${month}-01`), "MMMM", { locale: es }),
-    ingresos: monthlyData.ingresos[month] || 0,
     egresos: monthlyData.egresos[month] || 0,
   }));
 };
@@ -61,6 +58,7 @@ export default function SpendingTrendChart({ transactions }) {
   const [highlighted, setHighlighted] = useState(null); // Estado para el color activo
 
   const data = getMonthlyData(transactions);
+  console.log("🚀 ~ SpendingTrendChart ~ data:", data);
 
   const handleMouseEnter = (name) => {
     setHighlighted(name);
@@ -68,6 +66,14 @@ export default function SpendingTrendChart({ transactions }) {
 
   const handleMouseLeave = () => {
     setHighlighted(null);
+  };
+
+  const chartConfig = {
+    egresos: {
+      label: "Egresos",
+      color: "hsl(var(--chart-1))",
+      dataKey: "egresos",
+    },
   };
 
   return (
@@ -82,16 +88,13 @@ export default function SpendingTrendChart({ transactions }) {
           No hay datos para mostrar
         </p>
       ) : (
-        <ResponsiveContainer width="100%" height={350}>
+        <ChartContainer config={chartConfig} width="100%" height={350}>
           <AreaChart
+            accessibilityLayer
             data={data}
-            margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
+            margin={{ top: 10, right: 20, left: 20, bottom: 0 }}
           >
             <defs>
-              {/* <linearGradient id="colorIngreso" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#4caf50" stopOpacity={highlighted === "Ingresos" ? 0.8 : 0.6} />
-              <stop offset="95%" stopColor="#81c784" stopOpacity={highlighted === "Ingresos" ? 0.8 : 0} />
-            </linearGradient> */}
               <linearGradient id="colorEgreso" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
@@ -105,36 +108,26 @@ export default function SpendingTrendChart({ transactions }) {
                 />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" />
+            <ChartTooltip
+              content={
+                <ChartTooltipContent
+                  formatter={(value) => currencyFormatter.format(value)}
+                  labelFormatter={(value) => capitalize(value)}
+                />
+              }
+            />
+            <ChartLegend content={<ChartLegendContent />} />
             <XAxis dataKey="month" />
-            <YAxis tickFormatter={currencyFormatter} />
-            <Legend
-              align="center"
-              onMouseEnter={(e) => handleMouseEnter(e.value)}
-              onMouseLeave={handleMouseLeave}
-            />
-            <Tooltip
-              formatter={(value) => currencyFormatter.format(value)}
-              labelFormatter={(value) => capitalize(value)}
-            />
-            {/* <Area
-            type="monotone"
-            dataKey="ingresos"
-            stroke="#4caf50"
-            fillOpacity={1}
-            fill="url(#colorIngreso)"
-            name="Ingresos"
-          /> */}
+            <YAxis tickFormatter={(value) => currencyFormatter.format(value)} />
             <Area
               type="monotone"
-              dataKey="egresos"
+              dataKey={chartConfig.egresos.dataKey}
               stroke="#d5294d"
               fillOpacity={1}
               fill="url(#colorEgreso)"
-              name="Egresos"
             />
           </AreaChart>
-        </ResponsiveContainer>
+        </ChartContainer>
       )}
     </CardComponent>
   );

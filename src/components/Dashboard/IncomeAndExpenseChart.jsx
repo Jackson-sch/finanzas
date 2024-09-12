@@ -1,9 +1,10 @@
 import { CardComponent } from "@/components/CardComponent";
-import React from "react";
+import { ArrowDownNarrowWide, ArrowUpNarrowWide } from "lucide-react";
 import {
   Bar,
   BarChart,
   CartesianGrid,
+  Legend,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -12,6 +13,14 @@ import {
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import capitalize from "@/utils/capitalize";
+import {
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "../ui/chart";
+import { currencyFormatter } from "@/utils/CurrencyFormatter";
 
 // Función para agrupar transacciones por mes y tipo
 const groupTransactionsByMonthAndType = (transactions) => {
@@ -48,6 +57,21 @@ export default function IncomeAndExpenseChart({ transactions }) {
   // Transforma las transacciones para obtener ingresos y egresos mensuales
   const data = groupTransactionsByMonthAndType(transactions);
 
+  const chartConfig = {
+    ingresos: {
+      label: "Ingresos",
+      color: "hsl(var(--chart-1))",
+      dataKey: "ingresos",
+      icon: ArrowUpNarrowWide,
+    },
+    egresos: {
+      label: "Egresos",
+      color: "hsl(var(--chart-2))",
+      dataKey: "egresos",
+      icon: ArrowDownNarrowWide,
+    },
+  };
+
   return (
     <CardComponent
       title="Ingresos vs Egresos"
@@ -60,8 +84,12 @@ export default function IncomeAndExpenseChart({ transactions }) {
           No hay datos para mostrar
         </p>
       ) : (
-        <ResponsiveContainer width="100%" height={415}>
-          <BarChart data={data}>
+        <ChartContainer config={chartConfig} width="100%" height={415}>
+          <BarChart
+            accessibilityLayer
+            data={data}
+            margin={{ top: 10, right: 20, left: 20, bottom: 0 }}
+          >
             <defs>
               <linearGradient id="gradIngresos" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#105494" stopOpacity={0.8} />
@@ -72,17 +100,38 @@ export default function IncomeAndExpenseChart({ transactions }) {
                 <stop offset="95%" stopColor="#F87171" stopOpacity={0.3} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis tickFormatter={(value) => `S/ ${value.toLocaleString()}`} />
-            <Tooltip
-              formatter={(value) => `S/ ${value.toLocaleString()}`}
-              labelFormatter={(value) => capitalize(value)}
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="name"
+              tickFormatter={(value) => capitalize(value.slice(0, 3))}
             />
-            <Bar dataKey="ingresos" fill="url(#gradIngresos)" />
-            <Bar dataKey="egresos" fill="url(#gradEgresos)" />
+            <YAxis tickFormatter={(value) => currencyFormatter.format(value)} />
+            <ChartTooltip 
+              content={
+                <ChartTooltipContent
+                formatter={(value) => currencyFormatter.format(value)}
+                labelFormatter={(value) => capitalize(value)}
+                />
+              }
+            />
+            <ChartLegend content={<ChartLegendContent  />} />
+            
+            {/* <Tooltip
+              formatter={(value) => currencyFormatter.format(value)}
+              labelFormatter={(value) => capitalize(value)}
+            /> */}
+            <Bar
+              dataKey={chartConfig.ingresos.dataKey}
+              fill="url(#gradIngresos)"
+              radius={[4, 4, 0, 0]}
+            />
+            <Bar
+              dataKey={chartConfig.egresos.dataKey}
+              fill="url(#gradEgresos)"
+              radius={[4, 4, 0, 0]}
+            />
           </BarChart>
-        </ResponsiveContainer>
+        </ChartContainer>
       )}
     </CardComponent>
   );
