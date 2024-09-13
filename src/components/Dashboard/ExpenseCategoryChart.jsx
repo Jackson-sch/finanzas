@@ -10,51 +10,9 @@ import {
   ChartTooltipContent,
 } from "../ui/chart";
 import capitalize from "@/utils/capitalize";
+import generateChartConfig from "@/utils/ChartConfig";
 
-// Función para generar la configuración del gráfico dinámicamente
-const generateChartConfig = (data) => {
-  const colors = [
-    "hsl(var(--chart-1))",
-    "hsl(var(--chart-2))",
-    "hsl(var(--chart-3))",
-    "hsl(var(--chart-4))",
-    "hsl(var(--chart-5))",
-    "hsl(var(--chart-6))",
-    "hsl(var(--chart-7))",
-    "hsl(var(--chart-8))",
-    "hsl(var(--chart-9))",
-    "hsl(var(--chart-10))",
-    "hsl(var(--chart-11))",
-    "hsl(var(--chart-12))",
-    "hsl(var(--chart-13))",
-    "hsl(var(--chart-14))",
-    "hsl(var(--chart-15))",
-    "hsl(var(--chart-16))",
-    "hsl(var(--chart-17))",
-    "hsl(var(--chart-18))",
-    "hsl(var(--chart-19))",
-    "hsl(var(--chart-20))",
-    // Añade más colores si es necesario
-  ];
 
-  return data.reduce(
-    (config, item, index) => {
-      config[item.name] = {
-        label: capitalize(item.name),
-        color: colors[index % colors.length],
-        dataKey: currencyFormatter.format(item.value),
-      };
-
-      console.log("🚀 ~ generateChartConfig ~ config:", config);
-      return config;
-    },
-
-    {
-      value: { label: data.value },
-      name: { label: data.name },
-    },
-  );
-};
 
 // Función para agrupar transacciones por categoría solo de egresos
 const groupTransactionsByCategory = (transactions) => {
@@ -83,11 +41,9 @@ export default function ExpenseCategoryChart({ transactions }) {
 
   // Transforma las transacciones para que se agrupen por categoría
   const dataForChart = groupTransactionsByCategory(expenseTransactions);
-  console.log("🚀 ~ ExpenseCategoryChart ~ dataForChart:", dataForChart);
 
   // Genera la configuración del gráfico
   const chartConfig = generateChartConfig(dataForChart);
-  console.log("🚀 ~ ExpenseCategoryChart ~ chartConfig:", chartConfig);
 
   return (
     <CardComponent
@@ -110,7 +66,7 @@ export default function ExpenseCategoryChart({ transactions }) {
               cx="50%"
               cy="50%"
               labelLine={false}
-              outerRadius={110}
+              outerRadius={100}
               fill="#8884d8"
               dataKey="value"
               nameKey="name"

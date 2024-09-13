@@ -71,8 +71,7 @@ export default function SpendingTrendChart({ transactions }) {
   const chartConfig = {
     egresos: {
       label: "Egresos",
-      color: "hsl(var(--chart-1))",
-      dataKey: "egresos",
+      color: "hsl(var(--chart-11))",
     },
   };
 
@@ -98,33 +97,41 @@ export default function SpendingTrendChart({ transactions }) {
               <linearGradient id="colorEgreso" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="#d5294d"
-                  stopOpacity={highlighted === "Egresos" ? 0.8 : 0.6}
+                  stopColor="hsl(var(--chart-11))"
+                  stopOpacity={0.8}
                 />
                 <stop
                   offset="95%"
-                  stopColor="#ea546c"
-                  stopOpacity={highlighted === "Egresos" ? 0.8 : 0}
+                  stopColor="hsl(var(--chart-11))"
+                  stopOpacity={0.1}
                 />
               </linearGradient>
             </defs>
             <ChartTooltip
+              cursor={false}
               content={
                 <ChartTooltipContent
-                  formatter={(value) => currencyFormatter.format(value)}
+                  /* formatter={(value) => currencyFormatter.format(value)} */
                   labelFormatter={(value) => capitalize(value)}
                 />
               }
             />
             <ChartLegend content={<ChartLegendContent />} />
-            <XAxis dataKey="month" />
+            <XAxis
+              dataKey="month"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              tickFormatter={(value) => capitalize(value.slice(0, 3))}
+            />
             <YAxis tickFormatter={(value) => currencyFormatter.format(value)} />
             <Area
-              type="monotone"
-              dataKey={chartConfig.egresos.dataKey}
-              stroke="#d5294d"
-              fillOpacity={1}
+              type="natural"
+              dataKey="egresos"
+              stroke="hsl(var(--chart-11))"
+              fillOpacity={0.8}
               fill="url(#colorEgreso)"
+              stackId="a"
             />
           </AreaChart>
         </ChartContainer>

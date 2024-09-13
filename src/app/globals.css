@@ -27,26 +27,26 @@
     --ring: 222.2 84% 4.9%;
     --radius: 0.5rem;
     /* Paleta para modo claro */
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --chart-6: 290 50% 60%;
-    --chart-7: 150 50% 45%;
-    --chart-8: 210 65% 55%;
-    --chart-9: 330 65% 65%;
-    --chart-10: 60 80% 75%;
-    --chart-11: 0 60% 50%;
-    --chart-12: 180 50% 50%;
-    --chart-13: 270 60% 70%;
-    --chart-14: 90 60% 50%;
-    --chart-15: 30 90% 60%;
-    --chart-16: 240 60% 60%;
-    --chart-17: 120 40% 50%;
-    --chart-18: 300 60% 50%;
-    --chart-19: 15 80% 50%;
-    --chart-20: 200 70% 50%;
+    --chart-1: 12 76% 61%; /* Rojo coral */
+    --chart-2: 173 58% 39%; /* Verde azulado */
+    --chart-3: 197 37% 24%; /* Azul marino */
+    --chart-4: 43 74% 66%; /* Amarillo dorado */
+    --chart-5: 27 87% 67%; /* Naranja */
+    --chart-6: 290 50% 60%; /* Púrpura */
+    --chart-7: 150 50% 45%; /* Verde esmeralda */
+    --chart-8: 210 65% 55%; /* Azul cielo */
+    --chart-9: 330 65% 65%; /* Rosa */
+    --chart-10: 60 80% 75%; /* Amarillo pastel */
+    --chart-11: 0 60% 50%; /* Rojo */
+    --chart-12: 180 50% 50%; /* Turquesa */
+    --chart-13: 270 60% 70%; /* Lavanda */
+    --chart-14: 90 60% 50%; /* Verde lima */
+    --chart-15: 30 90% 60%; /* Naranja brillante */
+    --chart-16: 240 60% 60%; /* Azul real */
+    --chart-17: 120 40% 50%; /* Verde bosque */
+    --chart-18: 300 60% 50%; /* Magenta */
+    --chart-19: 15 80% 50%; /* Rojo anaranjado */
+    --chart-20: 200 70% 50%; /* Azul cerúleo */
   }
 
   .dark {

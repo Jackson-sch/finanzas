@@ -21,6 +21,7 @@ import {
   ChartTooltipContent,
 } from "../ui/chart";
 import { currencyFormatter } from "@/utils/CurrencyFormatter";
+import generateChartConfig from "@/utils/ChartConfig";
 
 // Función para agrupar transacciones por mes y tipo
 const groupTransactionsByMonthAndType = (transactions) => {
@@ -56,19 +57,19 @@ const groupTransactionsByMonthAndType = (transactions) => {
 export default function IncomeAndExpenseChart({ transactions }) {
   // Transforma las transacciones para obtener ingresos y egresos mensuales
   const data = groupTransactionsByMonthAndType(transactions);
+  console.log("🚀 ~ IncomeAndExpenseChart ~ data:", data);
 
+  // Genera la configuración del gráfico
   const chartConfig = {
     ingresos: {
       label: "Ingresos",
-      color: "hsl(var(--chart-1))",
+      color: "hsl(var(--chart-8))",
       dataKey: "ingresos",
-      icon: ArrowUpNarrowWide,
     },
     egresos: {
       label: "Egresos",
-      color: "hsl(var(--chart-2))",
+      color: "hsl(var(--chart-11))",
       dataKey: "egresos",
-      icon: ArrowDownNarrowWide,
     },
   };
 
@@ -84,52 +85,70 @@ export default function IncomeAndExpenseChart({ transactions }) {
           No hay datos para mostrar
         </p>
       ) : (
-        <ChartContainer config={chartConfig} width="100%" height={415}>
+        <ChartContainer config={chartConfig}>
           <BarChart
             accessibilityLayer
             data={data}
             margin={{ top: 10, right: 20, left: 20, bottom: 0 }}
           >
-            <defs>
+            {/* <defs>
               <linearGradient id="gradIngresos" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#105494" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#2086d7" stopOpacity={0.3} />
+                <stop
+                  offset="5%"
+                  stopColor="var(--color-ingresos)"
+                  stopOpacity={0.8}
+                />
+                <stop
+                  offset="95%"
+                  stopColor="var(--color-ingresos)"
+                  stopOpacity={0.4}
+                />
               </linearGradient>
               <linearGradient id="gradEgresos" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#EF4444" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#F87171" stopOpacity={0.3} />
+                <stop
+                  offset="5%"
+                  stopColor="var(--color-egresos)"
+                  stopOpacity={0.8}
+                />
+                <stop
+                  offset="95%"
+                  stopColor="var(--color-egresos)"
+                  stopOpacity={0.4}
+                />
               </linearGradient>
-            </defs>
+            </defs> */}
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="name"
+              tickMargin={10}
+              minTickGap={32}
               tickFormatter={(value) => capitalize(value.slice(0, 3))}
             />
-            <YAxis tickFormatter={(value) => currencyFormatter.format(value)} />
-            <ChartTooltip 
+            <YAxis
+              tickFormatter={(value) => currencyFormatter.format(value)}
+            />
+            <ChartTooltip
+              cursor={false}
               content={
                 <ChartTooltipContent
-                formatter={(value) => currencyFormatter.format(value)}
-                labelFormatter={(value) => capitalize(value)}
+                  labelFormatter={(value) => capitalize(value)}
+                  indicator="dot"
                 />
               }
             />
-            <ChartLegend content={<ChartLegendContent  />} />
-            
-            {/* <Tooltip
-              formatter={(value) => currencyFormatter.format(value)}
-              labelFormatter={(value) => capitalize(value)}
-            /> */}
             <Bar
-              dataKey={chartConfig.ingresos.dataKey}
-              fill="url(#gradIngresos)"
+              dataKey="ingresos"
+              fill="var(--color-ingresos)"
+              fillOpacity={0.8}
               radius={[4, 4, 0, 0]}
             />
             <Bar
-              dataKey={chartConfig.egresos.dataKey}
-              fill="url(#gradEgresos)"
+              dataKey="egresos"
+              fill="var(--color-egresos)"
+              fillOpacity={0.8}
               radius={[4, 4, 0, 0]}
             />
+            <ChartLegend content={<ChartLegendContent />} />
           </BarChart>
         </ChartContainer>
       )}
