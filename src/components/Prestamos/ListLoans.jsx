@@ -1,11 +1,4 @@
-import { useState, useMemo } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import React, { useState, useMemo, useCallback } from "react";
 import {
   Table,
   TableHeader,
@@ -14,7 +7,6 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -22,94 +14,116 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import capitalize from "@/utils/capitalize";
-import { calculateSimulatorData } from "@/utils/loanSimulator/LoanSimulator";
-import { CardComponent } from "@/components/CardComponent";
-import { currencyFormatter } from "@/utils/CurrencyFormatter";
 import { Button } from "@/components/ui/button";
-import { Trash } from "lucide-react";
-import { formatLocalDate } from "@/utils/formatDate";
-import InputSearch from "@/components/InputSearch";
+import { Trash, WalletMinimal } from "lucide-react";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import { CardComponent } from "@/components/CardComponent";
+import InputSearch from "@/components/InputSearch";
+import NoDataDisplay from "../NoDataDisplay/NoDataDisplay";
+import PaginationBar from "../PaginationBar";
+import { calculateSimulatorData } from "@/utils/loanSimulator/LoanSimulator";
+import { currencyFormatter } from "@/utils/CurrencyFormatter";
+import { formatLocalDate } from "@/utils/formatDate";
+import capitalize from "@/utils/capitalize";
 
-export default function Component({ loans, deleteLoan }) {
+const LOANS_PER_PAGE = 5;
+
+export default function LoanList({ loans, deleteLoan }) {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("date");
   const [currentPage, setCurrentPage] = useState(1);
-  const loansPerPage = 5;
 
   const filteredAndSortedLoans = useMemo(() => {
     return loans
       .filter((loan) => {
         const simulatorData = calculateSimulatorData(loan);
+        const searchLower = search.toLowerCase();
         return (
-          simulatorData.borrower.toLowerCase().includes(search.toLowerCase()) ||
-          loan.borrower.toLowerCase().includes(search.toLowerCase()) // Filtro por el campo adicional borrower
+          simulatorData.borrower.toLowerCase().includes(searchLower) ||
+          loan.borrower.toLowerCase().includes(searchLower)
         );
       })
       .sort((a, b) => {
-        if (sortBy === "date") {
-          return new Date(b.date) - new Date(a.date);
-        } else if (sortBy === "amount") {
-          return (
-            calculateSimulatorData(b).loanAmount -
-            calculateSimulatorData(a).loanAmount
-          );
-        } else if (sortBy === "borrower") {
-          // Ordenar por borrower si se selecciona
-          return a.borrower.localeCompare(b.borrower);
+        const aData = calculateSimulatorData(a);
+        const bData = calculateSimulatorData(b);
+        switch (sortBy) {
+          case "date":
+            return new Date(b.date) - new Date(a.date);
+          case "amount":
+            return bData.loanAmount - aData.loanAmount;
+          case "borrower":
+            return aData.borrower.localeCompare(bData.borrower);
+          default:
+            return 0;
         }
-        return 0;
       });
   }, [loans, search, sortBy]);
 
-  const paginatedLoans = useMemo(() => {
-    const startIndex = (currentPage - 1) * loansPerPage;
-    return filteredAndSortedLoans.slice(startIndex, startIndex + loansPerPage);
+  const { paginatedLoans, totalPages } = useMemo(() => {
+    const startIndex = (currentPage - 1) * LOANS_PER_PAGE;
+    const paginatedLoans = filteredAndSortedLoans.slice(startIndex, startIndex + LOANS_PER_PAGE);
+    const totalPages = Math.ceil(filteredAndSortedLoans.length / LOANS_PER_PAGE);
+    return { paginatedLoans, totalPages };
   }, [filteredAndSortedLoans, currentPage]);
 
-  const totalPages = Math.ceil(filteredAndSortedLoans.length / loansPerPage);
+  const handleSearchChange = useCallback((value) => {
+    setSearch(value);
+    setCurrentPage(1);
+  }, []);
 
-  const generatePaginationItems = () => {
-    let items = [];
-    for (let i = 1; i <= totalPages; i++) {
-      if (
-        i === 1 ||
-        i === totalPages ||
-        (i >= currentPage - 1 && i <= currentPage + 1)
-      ) {
-        items.push(
-          <PaginationItem key={i}>
-            <PaginationLink
-              href="#"
-              isActive={i === currentPage}
-              onClick={(e) => {
-                e.preventDefault();
-                setCurrentPage(i);
-              }}
-            >
-              {i}
-            </PaginationLink>
-          </PaginationItem>,
-        );
-      } else if (i === currentPage - 2 || i === currentPage + 2) {
-        items.push(
-          <PaginationItem key={i}>
-            <PaginationEllipsis />
-          </PaginationItem>,
-        );
-      }
+  const handleSortChange = useCallback((value) => {
+    setSortBy(value);
+    setCurrentPage(1);
+  }, []);
+
+  const handlePageChange = useCallback((page) => {
+    setCurrentPage(page);
+  }, []);
+
+  const renderTableBody = () => {
+    if (filteredAndSortedLoans.length === 0) {
+      return (
+        <TableRow>
+          <TableCell colSpan={7} className="h-24 text-center">
+            <NoDataDisplay
+              icon={WalletMinimal}
+              title="No hay prestatarios registrados"
+              description="No se han registrado prestatarios en el sistema"
+            />
+          </TableCell>
+        </TableRow>
+      );
     }
-    return items;
+
+    return paginatedLoans.map((loan) => {
+      const loanData = calculateSimulatorData(loan);
+      return (
+        <TableRow key={loan._id}>
+          <TableCell>{formatLocalDate(loan.date)}</TableCell>
+          <TableCell>{capitalize(loanData.borrower)}</TableCell>
+          <TableCell className="text-center">{loanData.totalPayments}</TableCell>
+          <TableCell className="text-right">
+            {currencyFormatter.format(loanData.loanAmount)}
+          </TableCell>
+          <TableCell className="text-right">
+            {currencyFormatter.format(loanData.paymentAmount)}
+          </TableCell>
+          <TableCell className="text-right font-bold">
+            {currencyFormatter.format(loanData.totalAmount)}
+          </TableCell>
+          <TableCell className="text-right">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mr-2"
+              onClick={() => deleteLoan(loan._id)}
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          </TableCell>
+        </TableRow>
+      );
+    });
   };
 
   return (
@@ -121,12 +135,12 @@ export default function Component({ loans, deleteLoan }) {
       <div className="mb-4 flex flex-col justify-between gap-4 md:flex-row">
         <div className="max-w-sm flex-1">
           <InputSearch
-            setSearchTerm={setSearch}
+            setSearchTerm={handleSearchChange}
             searchTerm={search}
             placeholder="Buscar por prestatario"
           />
         </div>
-        <Select value={sortBy} onValueChange={setSortBy}>
+        <Select value={sortBy} onValueChange={handleSortChange}>
           <SelectTrigger className="w-full md:w-[180px]">
             <SelectValue placeholder="Ordenar por" />
           </SelectTrigger>
@@ -137,93 +151,30 @@ export default function Component({ loans, deleteLoan }) {
           </SelectContent>
         </Select>
       </div>
-      <ScrollArea className="h-full w-full">
+      <ScrollArea className="h-[400px] w-full">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Fecha</TableHead>
               <TableHead>Prestatario</TableHead>
+              <TableHead>N° de cuotas</TableHead>
               <TableHead className="text-right">Monto Inicial</TableHead>
               <TableHead className="text-right">Pago mensual</TableHead>
               <TableHead className="text-right">Total</TableHead>
               <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
-
-          <TableBody>
-            {filteredAndSortedLoans.length === 0 && (
-              <TableRow>
-                <TableCell
-                  colSpan={6}
-                  className="h-24 text-center text-xl capitalize"
-                >
-                  No hay prestatarios registrados
-                </TableCell>
-              </TableRow>
-            )}
-            {paginatedLoans.map((loan) => {
-              const loanData = calculateSimulatorData(loan);
-              return (
-                <TableRow key={loan._id}>
-                  <TableCell>{formatLocalDate(loan.date)}</TableCell>
-                  <TableCell>{capitalize(loanData.borrower)}</TableCell>
-                  <TableCell className="text-right">
-                    {currencyFormatter.format(loanData.loanAmount)}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {currencyFormatter.format(loanData.paymentAmount)}
-                  </TableCell>
-                  <TableCell className="text-right font-bold">
-                    {currencyFormatter.format(loanData.totalAmount)}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="mr-2"
-                      onClick={() => deleteLoan(loan._id)}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-          
+          <TableBody>{renderTableBody()}</TableBody>
         </Table>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
-
-      <div className="mt-4 w-full flex flex-col items-center justify-between gap-4 md:flex-row">
-        <div className="w-full text-sm">
-          Mostrando {paginatedLoans.length} de {filteredAndSortedLoans.length}{" "}
-          préstamos
-        </div>
-        <Pagination className="md:justify-end">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setCurrentPage((prev) => Math.max(prev - 1, 1));
-                }}
-              />
-            </PaginationItem>
-            {generatePaginationItems()}
-            <PaginationItem>
-              <PaginationNext
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setCurrentPage((prev) => Math.min(prev + 1, totalPages));
-                }}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </div>
+      <PaginationBar
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        visibleItems={paginatedLoans.length}
+        totalItems={filteredAndSortedLoans.length}
+      />
     </CardComponent>
   );
 }

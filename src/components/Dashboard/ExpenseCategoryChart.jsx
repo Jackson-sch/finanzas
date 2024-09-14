@@ -1,7 +1,6 @@
 import React from "react";
 import { CardComponent } from "@/components/CardComponent";
-import { currencyFormatter } from "@/utils/CurrencyFormatter";
-import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
+import { Cell, Pie, PieChart } from "recharts";
 import {
   ChartContainer,
   ChartLegend,
@@ -9,10 +8,10 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "../ui/chart";
-import capitalize from "@/utils/capitalize";
 import generateChartConfig from "@/utils/ChartConfig";
-
-
+import { Skeleton } from "../ui/skeleton";
+import NoDataDisplay from "../NoDataDisplay/NoDataDisplay";
+import { PieChartIcon } from "lucide-react";
 
 // Función para agrupar transacciones por categoría solo de egresos
 const groupTransactionsByCategory = (transactions) => {
@@ -52,13 +51,15 @@ export default function ExpenseCategoryChart({ transactions }) {
       className="h-full min-w-max shadow-lg"
     >
       {dataForChart.length === 0 ? (
-        <p className="text-center text-muted-foreground">
-          No hay datos para mostrar
-        </p>
+        <NoDataDisplay
+          icon={PieChartIcon}
+          title="No hay datos disponibles"
+          description="Aún no hay transacciones de egresos registradas para mostrar en este gráfico de gastos por categoría."
+        />
       ) : (
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-[300px]"
+          className="mx-auto aspect-square h-full max-h-[400px]"
         >
           <PieChart>
             <Pie
@@ -68,8 +69,6 @@ export default function ExpenseCategoryChart({ transactions }) {
               labelLine={false}
               outerRadius={100}
               fill="#8884d8"
-              dataKey="value"
-              nameKey="name"
             >
               {dataForChart.map((entry, index) => (
                 <Cell
@@ -83,7 +82,7 @@ export default function ExpenseCategoryChart({ transactions }) {
             />
             <ChartLegend
               content={<ChartLegendContent nameKey="name" valueKey="value" />}
-              className="flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center"
+              className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center"
             />
           </PieChart>
         </ChartContainer>

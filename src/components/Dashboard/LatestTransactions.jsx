@@ -6,6 +6,7 @@ import React from "react";
 import { format, isAfter, subDays } from "date-fns"; // Importa las funciones necesarias de date-fns
 import { es } from "date-fns/locale"; // Importa la localización en español
 import { currencyFormatter } from "@/utils/CurrencyFormatter";
+import NoDataDisplay from "../NoDataDisplay/NoDataDisplay";
 
 export default function LatestTransactions({ transactions }) {
   // Calcula la fecha de hace 30 días desde hoy
@@ -70,9 +71,11 @@ export default function LatestTransactions({ transactions }) {
               </div>
             ))
           ) : (
-            <p className="text-sm text-gray-500">
-              No hay transacciones en los últimos 30 días.
-            </p>
+            <NoDataDisplay
+              icon={ArrowDownIcon}
+              title="No hay datos disponibles"
+              description="No hay transacciones para mostrar en este momento."
+            />
           )}
         </div>
       </ScrollArea>

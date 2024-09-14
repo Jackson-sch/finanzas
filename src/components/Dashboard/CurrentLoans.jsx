@@ -1,6 +1,8 @@
 import { CardComponent } from "@/components/CardComponent";
 import { currencyFormatter } from "@/utils/CurrencyFormatter";
 import { format, addMonths, isBefore } from "date-fns";
+import NoDataDisplay from "../NoDataDisplay/NoDataDisplay";
+import { DollarSign, HandCoins } from "lucide-react";
 
 export default function CurrentLoans({ loans }) {
   // traemos los ultimos 5 prestamos
@@ -9,13 +11,15 @@ export default function CurrentLoans({ loans }) {
     <CardComponent
       title="Préstamos Actuales"
       description="Información sobre los préstamos actuales"
-      className=" h-full shadow-lg"
+      className="h-full shadow-lg"
     >
       <div className="space-y-6">
         {loans.length === 0 && (
-          <p className="text-center text-muted-foreground">
-            No hay datos para mostrar
-          </p>
+          <NoDataDisplay
+            icon={HandCoins}
+            title="No hay datos disponibles"
+            description="No hay prestatarios para mostrar en este momento."
+          />
         )}
         {loans.map((loan) => {
           const startDate = new Date(loan.date);

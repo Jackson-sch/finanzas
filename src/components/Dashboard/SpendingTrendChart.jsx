@@ -21,6 +21,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "../ui/chart";
+import NoDataDisplay from "../NoDataDisplay/NoDataDisplay";
+import { AreaChartIcon } from "lucide-react";
 
 // Función para transformar las transacciones en egresos e ingresos por mes
 const getMonthlyData = (transactions) => {
@@ -58,7 +60,6 @@ export default function SpendingTrendChart({ transactions }) {
   const [highlighted, setHighlighted] = useState(null); // Estado para el color activo
 
   const data = getMonthlyData(transactions);
-  console.log("🚀 ~ SpendingTrendChart ~ data:", data);
 
   const handleMouseEnter = (name) => {
     setHighlighted(name);
@@ -83,9 +84,11 @@ export default function SpendingTrendChart({ transactions }) {
     >
       {/* si no hay datos para el gráfico, muestra un mensaje */}
       {data.length === 0 ? (
-        <p className="text-center text-muted-foreground">
-          No hay datos para mostrar
-        </p>
+        <NoDataDisplay
+          icon={AreaChartIcon}
+          title="No hay datos de transacciones"
+          description="No hay datos de transacciones para mostrar en este gráfico de tendencia de egresos."
+        />
       ) : (
         <ChartContainer config={chartConfig} width="100%" height={350}>
           <AreaChart

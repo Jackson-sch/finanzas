@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { currencyFormatter } from "@/utils/CurrencyFormatter";
 import { formatLocalDate } from "@/utils/formatDate";
+import NoDataDisplay from "../NoDataDisplay/NoDataDisplay";
 
 export default function DetailsLoan({ simulatorData }) {
 
@@ -22,13 +23,11 @@ export default function DetailsLoan({ simulatorData }) {
         description="Vea los detalles y el cronograma de su préstamo."
         className="shadow-lg h-full"
       >
-        <Card className="container mx-auto">
-          <CardContent className="pt-6">
-            <p className="text-center text-muted-foreground">
-              No hay datos disponibles para mostrar.
-            </p>
-          </CardContent>
-        </Card>
+        <NoDataDisplay 
+          icon={CreditCard}
+          title="No hay datos disponibles"
+          description="No hay ninguna simulación para mostrar en este momento."
+        />
       </CardComponent>
     );
   }

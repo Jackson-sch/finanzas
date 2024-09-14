@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { format, isWithinInterval } from "date-fns";
 import { es } from "date-fns/locale";
 import { CardComponent } from "../CardComponent";
@@ -16,7 +16,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Calendar as CalendarIcon } from "lucide-react";
+import { Trash2, Calendar as CalendarIcon, BoxIcon } from "lucide-react";
 import capitalize from "@/utils/capitalize";
 import {
   Select,
@@ -35,20 +35,27 @@ import {
 import InputSearch from "@/components/InputSearch";
 import { formatLocalDate } from "@/utils/formatDate";
 import { currencyFormatter } from "@/utils/CurrencyFormatter";
+import NoDataDisplay from "../NoDataDisplay/NoDataDisplay";
+import PaginationBar from "../PaginationBar";
 
-export default function ListTransactions({
-  transactions,
-  deleteTransaction,
-  setSelectedTransaction,
-}) {
-  const [filteredTransactions, setFilteredTransactions] =
-    useState(transactions);
+export default function ListTransactions({ transactions, deleteTransaction }) {
+  const [filteredTransactions, setFilteredTransactions] = useState(transactions);
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [date, setDate] = useState({
     from: undefined,
     to: undefined,
   });
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const transactionsPerPage = 5;
+
+  const paginatedTransactions = useMemo(() => {
+    const startIndex = (currentPage - 1) * transactionsPerPage;
+    return filteredTransactions.slice(startIndex, startIndex + transactionsPerPage);
+  }, [filteredTransactions, currentPage]);
+
+  const totalPages = Math.ceil(filteredTransactions.length / transactionsPerPage);
 
   useEffect(() => {
     let result = transactions;
@@ -57,15 +64,9 @@ export default function ListTransactions({
     if (searchTerm) {
       result = result.filter(
         (transaction) =>
-          transaction.description
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          transaction.category
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          transaction.tags.some((tag) =>
-            tag.toLowerCase().includes(searchTerm.toLowerCase()),
-          ),
+          transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          transaction.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          transaction.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
@@ -80,12 +81,17 @@ export default function ListTransactions({
         isWithinInterval(new Date(transaction.date), {
           start: date.from,
           end: date.to,
-        }),
+        })
       );
     }
 
     setFilteredTransactions(result);
+    setCurrentPage(1); // Reset to first page when filters change
   }, [transactions, searchTerm, typeFilter, date]);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
 
   return (
     <CardComponent
@@ -94,7 +100,7 @@ export default function ListTransactions({
       className="shadow-lg"
     >
       <div className="mb-6 grid gap-6">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
           <div className="max-w-sm flex-1">
             <InputSearch
               setSearchTerm={setSearchTerm}
@@ -102,7 +108,7 @@ export default function ListTransactions({
               placeholder="Buscar por descripción, categoría o etiqueta"
             />
           </div>
-          <div className="flex flex-col md:flex-row items-center gap-4">
+          <div className="flex flex-col items-center gap-4 md:flex-row">
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Filtrar por tipo" />
@@ -121,7 +127,7 @@ export default function ListTransactions({
                     variant={"outline"}
                     className={cn(
                       "w-full justify-start text-left font-normal",
-                      !date && "text-muted-foreground",
+                      !date && "text-muted-foreground"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
@@ -169,68 +175,70 @@ export default function ListTransactions({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredTransactions.length === 0 && (
+            {paginatedTransactions.length === 0 ? (
               <TableRow>
-                <TableCell
-                  colSpan={7}
-                  className="h-24 text-center text-xl capitalize"
-                >
-                  No hay transacciones
+                <TableCell colSpan={7} className="h-24 text-center text-xl">
+                  <NoDataDisplay 
+                    icon={BoxIcon} 
+                    title="No hay datos disponibles"
+                    description="No hay transacciones para mostrar en este momento."
+                  />
                 </TableCell>
               </TableRow>
+            ) : (
+              paginatedTransactions.map((transaction) => (
+                <TableRow key={transaction._id}>
+                  <TableCell>
+                    {transaction.date
+                      ? formatLocalDate(transaction.date)
+                      : "Fecha no disponible"}
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        transaction.type === "ingreso" ? "success" : "destructive"
+                      }
+                    >
+                      {transaction.type}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    {currencyFormatter.format(transaction.amount)}
+                  </TableCell>
+                  <TableCell>{transaction.category}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {transaction.tags.map((tag) => (
+                        <Badge key={tag} variant="outline">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell>{capitalize(transaction.description)}</TableCell>
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => deleteTransaction(transaction._id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
             )}
-            {filteredTransactions.map((transaction) => (
-              <TableRow key={transaction._id}>
-                <TableCell>
-                  {transaction.date
-                    ? formatLocalDate(transaction.date)
-                    : "Fecha no disponible"}
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant={
-                      transaction.type === "ingreso" ? "success" : "destructive"
-                    }
-                  >
-                    {transaction.type}
-                  </Badge>
-                </TableCell>
-                <TableCell className="font-medium">
-                  {currencyFormatter.format(transaction.amount)}
-                </TableCell>
-                <TableCell>{transaction.category}</TableCell>
-                <TableCell>
-                  <div className="flex flex-wrap gap-1">
-                    {transaction.tags.map((tag) => (
-                      <Badge key={tag} variant="outline">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </TableCell>
-                <TableCell>{capitalize(transaction.description)}</TableCell>
-                <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => deleteTransaction(transaction._id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setSelectedTransaction(transaction._id)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
           </TableBody>
         </Table>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
+      <PaginationBar 
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        visibleItems={paginatedTransactions.length}
+        totalItems={filteredTransactions.length}
+      />
     </CardComponent>
   );
 }

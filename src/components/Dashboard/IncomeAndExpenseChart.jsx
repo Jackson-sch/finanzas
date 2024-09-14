@@ -1,15 +1,5 @@
 import { CardComponent } from "@/components/CardComponent";
-import { ArrowDownNarrowWide, ArrowUpNarrowWide } from "lucide-react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Legend,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import capitalize from "@/utils/capitalize";
@@ -21,7 +11,8 @@ import {
   ChartTooltipContent,
 } from "../ui/chart";
 import { currencyFormatter } from "@/utils/CurrencyFormatter";
-import generateChartConfig from "@/utils/ChartConfig";
+import { BarChartIcon } from "lucide-react";
+import NoDataDisplay from "../NoDataDisplay/NoDataDisplay";
 
 // Función para agrupar transacciones por mes y tipo
 const groupTransactionsByMonthAndType = (transactions) => {
@@ -57,7 +48,6 @@ const groupTransactionsByMonthAndType = (transactions) => {
 export default function IncomeAndExpenseChart({ transactions }) {
   // Transforma las transacciones para obtener ingresos y egresos mensuales
   const data = groupTransactionsByMonthAndType(transactions);
-  console.log("🚀 ~ IncomeAndExpenseChart ~ data:", data);
 
   // Genera la configuración del gráfico
   const chartConfig = {
@@ -81,9 +71,11 @@ export default function IncomeAndExpenseChart({ transactions }) {
     >
       {/* si no hay datos para el gráfico, muestra un mensaje */}
       {data.length === 0 ? (
-        <p className="text-center text-muted-foreground">
-          No hay datos para mostrar
-        </p>
+        <NoDataDisplay
+          icon={BarChartIcon}
+          title="No hay datos de transacciones"
+          description="Aún no hay transacciones registradas para mostrar en este gráfico de ingresos vs egresos."
+        />
       ) : (
         <ChartContainer config={chartConfig}>
           <BarChart
@@ -91,32 +83,6 @@ export default function IncomeAndExpenseChart({ transactions }) {
             data={data}
             margin={{ top: 10, right: 20, left: 20, bottom: 0 }}
           >
-            {/* <defs>
-              <linearGradient id="gradIngresos" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-ingresos)"
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-ingresos)"
-                  stopOpacity={0.4}
-                />
-              </linearGradient>
-              <linearGradient id="gradEgresos" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-egresos)"
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-egresos)"
-                  stopOpacity={0.4}
-                />
-              </linearGradient>
-            </defs> */}
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="name"
@@ -124,9 +90,7 @@ export default function IncomeAndExpenseChart({ transactions }) {
               minTickGap={32}
               tickFormatter={(value) => capitalize(value.slice(0, 3))}
             />
-            <YAxis
-              tickFormatter={(value) => currencyFormatter.format(value)}
-            />
+            <YAxis tickFormatter={(value) => currencyFormatter.format(value)} />
             <ChartTooltip
               cursor={false}
               content={

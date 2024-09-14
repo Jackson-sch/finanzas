@@ -197,7 +197,7 @@ export default function PanelDashboard({ session }) {
         </div>
 
         <div className="col-span-7 md:col-span-3">
-          <ExpenseCategoryChart transactions={transactions} COLORS={COLORS} />
+          <ExpenseCategoryChart transactions={transactions}  />
         </div>
       </div>
 
