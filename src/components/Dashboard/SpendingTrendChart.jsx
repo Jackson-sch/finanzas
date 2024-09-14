@@ -79,7 +79,7 @@ export default function SpendingTrendChart({ transactions }) {
   return (
     <CardComponent
       title="Tendencia de Egresos"
-      description="Ingresos y egresos por mes"
+      description="Egresos por meses del año"
       className="shadow-lg"
     >
       {/* si no hay datos para el gráfico, muestra un mensaje */}
