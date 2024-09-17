@@ -57,17 +57,8 @@ const getMonthlyData = (transactions) => {
 };
 
 export default function SpendingTrendChart({ transactions }) {
-  const [highlighted, setHighlighted] = useState(null); // Estado para el color activo
 
   const data = getMonthlyData(transactions);
-
-  const handleMouseEnter = (name) => {
-    setHighlighted(name);
-  };
-
-  const handleMouseLeave = () => {
-    setHighlighted(null);
-  };
 
   const chartConfig = {
     egresos: {
@@ -80,7 +71,7 @@ export default function SpendingTrendChart({ transactions }) {
     <CardComponent
       title="Tendencia de Egresos"
       description="Egresos por meses del año"
-      className="shadow-lg"
+      className="shadow-lg h-full"
     >
       {/* si no hay datos para el gráfico, muestra un mensaje */}
       {data.length === 0 ? (
@@ -114,7 +105,6 @@ export default function SpendingTrendChart({ transactions }) {
               cursor={false}
               content={
                 <ChartTooltipContent
-                  /* formatter={(value) => currencyFormatter.format(value)} */
                   labelFormatter={(value) => capitalize(value)}
                 />
               }
