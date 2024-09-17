@@ -14,12 +14,12 @@ export function CardComponent({
   className = "",
 }) {
   return (
-    <Card className={className}>
+    <Card className={`${className} overflow-hidden`}>
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle className="text-lg">{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
-      <CardContent>{children}</CardContent>
+      <CardContent className="p-2 sm:p-6">{children}</CardContent>
     </Card>
   );
 }

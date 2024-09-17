@@ -85,7 +85,7 @@ export default function SpendingTrendChart({ transactions }) {
           <AreaChart
             accessibilityLayer
             data={data}
-            margin={{ top: 10, right: 20, left: 20, bottom: 0 }}
+            margin={{ top: 10, right: 14, left: 14, bottom: 0 }}
           >
             <defs>
               <linearGradient id="colorEgreso" x1="0" y1="0" x2="0" y2="1">
@@ -114,7 +114,7 @@ export default function SpendingTrendChart({ transactions }) {
               dataKey="month"
               tickLine={false}
               axisLine={false}
-              tickMargin={8}
+              tickMargin={6}
               tickFormatter={(value) => capitalize(value.slice(0, 3))}
             />
             <YAxis tickFormatter={(value) => currencyFormatter.format(value)} />
