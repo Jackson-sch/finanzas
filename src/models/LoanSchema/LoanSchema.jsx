@@ -24,7 +24,7 @@ const LoanSchema = new Schema(
     },
     interestRate: {
       //Tasa de interés mensual
-      type: Number,
+      type: String,
       required: true,
     },
     durationYears: {

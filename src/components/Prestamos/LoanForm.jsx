@@ -250,7 +250,7 @@ const calculateEstimatedPayment = useCallback(() => {
                     <FormControl>
                       <Input
                         readOnly
-                        type="number"
+                        type="string"
                         step="0.01"
                         placeholder="Calculado automáticamente"
                         {...field}

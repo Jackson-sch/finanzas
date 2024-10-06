@@ -13,7 +13,7 @@ export const loanSchema = object({
   
   interestYear: number().min(0, "La tasa de interés no puede ser negativa"),
   
-  interestRate: number().min(0, "La tasa de interés no puede ser negativa"),
+  interestRate: string().min(0, "La tasa de interés no puede ser negativa"),
   
   durationYears: number().min(0, "La duración no puede ser negativa"),
   
